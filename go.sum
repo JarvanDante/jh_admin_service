@@ -687,8 +687,6 @@ github.com/go-sql-driver/mysql v1.6.0/go.mod h1:DCzpHaOWr8IXmIStZouvnhqoel9Qv2LB
 github.com/go-sql-driver/mysql v1.7.0 h1:ueSltNNllEqE3qcWBTD0iQd3IpL/6U+mJxLkazJ7YPc=
 github.com/go-sql-driver/mysql v1.7.0/go.mod h1:OXbVy3sEdcQ2Doequ6Z5BW6fXNQTmx+9S1MCJN5yJMI=
 github.com/goccy/go-json v0.9.11/go.mod h1:6MelG93GURQebXPDq3khkgXZkazVtN9CRI+MGFi0w8I=
-github.com/gogf/gf-demo-grpc v0.0.0-20230427001521-b2354060ceeb h1:fnRGHeSAJ0N7AuSABBIwmnRh4vUYvLH/KWzq88MpM0I=
-github.com/gogf/gf-demo-grpc v0.0.0-20230427001521-b2354060ceeb/go.mod h1:SH6JW+NWADoMKZ5xcetIAmwTQvtyoE2s+BR7FdF6FZM=
 github.com/gogf/gf/contrib/drivers/mysql/v2 v2.4.0 h1:VNnOFQ44FGCrNdIE6zaizWilgr6G5n1YQ6JkMvtbJLA=
 github.com/gogf/gf/contrib/drivers/mysql/v2 v2.4.0/go.mod h1:hS3/ACE9qeQOe9fCIddOgE0PJoYJcYEv52/cvhxfxeU=
 github.com/gogf/gf/contrib/registry/file/v2 v2.4.0 h1:4U4zpACkpYLQbTaYpyexmI4mXRohnGPZ64GOM8flXkc=
