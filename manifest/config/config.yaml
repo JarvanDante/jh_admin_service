@@ -22,6 +22,6 @@ database:
     stdout: true
 
   default:
-    link: "mysql:root:12345678@tcp(127.0.0.1:3306)/test"
+    link: "mysql:root:654321@tcp(127.0.0.1:3306)/test"
     debug: true
 
