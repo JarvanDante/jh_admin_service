@@ -49,7 +49,10 @@ func (*Controller) Create(ctx context.Context, req *v1.CreateReq) (res *v1.Creat
 		return nil, err
 	}
 
-	middleware.LogWithTrace(ctx, "info", "创建用户成功 - 用户名: %s", req.Passport)
+	middleware.LogWithTraceAndFields(ctx, "info", "create user success", g.Map{
+		"username": req.Passport,
+		"nickname": req.Nickname,
+	})
 	return
 }
 

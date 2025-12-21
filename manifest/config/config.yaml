@@ -17,10 +17,14 @@ consul:
   servicePort: 8001
   serviceAddr: "172.19.0.31"
 
-# Global logging.
+# Global logging - JSON格式
 logger:
   level: "all"
   stdout: true
+  # 使用JSON格式输出
+  format: "json"
+  # 时间格式
+  timeFormat: "2006-01-02T15:04:05.000Z07:00"
 
 # Database.
 database:

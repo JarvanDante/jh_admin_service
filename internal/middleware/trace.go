@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -49,31 +50,63 @@ func GetTraceIDFromContext(ctx context.Context) string {
 	return ""
 }
 
-// LogWithTrace 带traceId的日志记录
+// LogWithTrace 带traceId的日志记录 - JSON格式
 func LogWithTrace(ctx context.Context, level string, message string, args ...interface{}) {
 	traceID := GetTraceIDFromContext(ctx)
 
-	// 构建带traceId的消息
-	var logMessage string
-	if traceID != "" {
-		logMessage = "[" + traceID + "] " + message
-	} else {
-		logMessage = message
+	// 构建结构化日志数据
+	logData := g.Map{
+		"service":  "user-service",
+		"trace_id": traceID,
+		"msg":      fmt.Sprintf(message, args...),
 	}
 
 	// 根据级别记录日志
 	switch strings.ToLower(level) {
 	case "debug":
-		g.Log().Debugf(ctx, logMessage, args...)
+		g.Log().Debug(ctx, logData)
 	case "info":
-		g.Log().Infof(ctx, logMessage, args...)
+		g.Log().Info(ctx, logData)
 	case "warn", "warning":
-		g.Log().Warningf(ctx, logMessage, args...)
+		g.Log().Warning(ctx, logData)
 	case "error":
-		g.Log().Errorf(ctx, logMessage, args...)
+		g.Log().Error(ctx, logData)
 	case "fatal":
-		g.Log().Fatalf(ctx, logMessage, args...)
+		g.Log().Fatal(ctx, logData)
 	default:
-		g.Log().Infof(ctx, logMessage, args...)
+		g.Log().Info(ctx, logData)
+	}
+}
+
+// LogWithTraceAndFields 带traceId和额外字段的日志记录 - JSON格式
+func LogWithTraceAndFields(ctx context.Context, level string, message string, fields g.Map, args ...interface{}) {
+	traceID := GetTraceIDFromContext(ctx)
+
+	// 构建结构化日志数据
+	logData := g.Map{
+		"service":  "user-service",
+		"trace_id": traceID,
+		"msg":      fmt.Sprintf(message, args...),
+	}
+
+	// 添加额外字段
+	for k, v := range fields {
+		logData[k] = v
+	}
+
+	// 根据级别记录日志
+	switch strings.ToLower(level) {
+	case "debug":
+		g.Log().Debug(ctx, logData)
+	case "info":
+		g.Log().Info(ctx, logData)
+	case "warn", "warning":
+		g.Log().Warning(ctx, logData)
+	case "error":
+		g.Log().Error(ctx, logData)
+	case "fatal":
+		g.Log().Fatal(ctx, logData)
+	default:
+		g.Log().Info(ctx, logData)
 	}
 }

@@ -111,7 +111,11 @@ func (*Controller) Login(ctx context.Context, req *v1.LoginReq) (res *v1.LoginRe
 		Socket: socketAddr,
 	}
 
-	middleware.LogWithTrace(ctx, "info", "登录成功 - 用户名: %s", req.Username)
+	middleware.LogWithTraceAndFields(ctx, "info", "登录成功", g.Map{
+		"username": req.Username,
+		"admin_id": admin.Id,
+		"site_id":  siteId,
+	})
 	return res, nil
 }
 
