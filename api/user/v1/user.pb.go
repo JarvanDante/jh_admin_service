@@ -9,12 +9,13 @@
 package v1
 
 import (
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	pbentity "jh_user_service/api/pbentity"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
+
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 )
 
 const (
@@ -26,9 +27,9 @@ const (
 
 type CreateReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Passport      string                 `protobuf:"bytes,1,opt,name=Passport,proto3" json:"Passport,omitempty"` // v: required
-	Password      string                 `protobuf:"bytes,2,opt,name=Password,proto3" json:"Password,omitempty"` // v: required
-	Nickname      string                 `protobuf:"bytes,3,opt,name=Nickname,proto3" json:"Nickname,omitempty"` // v: required
+	Passport      string                 `protobuf:"bytes,1,opt,name=Passport,proto3" json:"Passport,omitempty" v:"required"` // v: required
+	Password      string                 `protobuf:"bytes,2,opt,name=Password,proto3" json:"Password,omitempty" v:"required"` // v: required
+	Nickname      string                 `protobuf:"bytes,3,opt,name=Nickname,proto3" json:"Nickname,omitempty" v:"required"` // v: required
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -122,7 +123,7 @@ func (*CreateRes) Descriptor() ([]byte, []int) {
 
 type GetOneReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            uint64                 `protobuf:"varint,1,opt,name=Id,proto3" json:"Id,omitempty"` // v: required
+	Id            uint64                 `protobuf:"varint,1,opt,name=Id,proto3" json:"Id,omitempty" v:"required"` // v: required
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -308,7 +309,7 @@ type DeleteReq struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// v: min:1#
 	// v: Please select the user to be deleted.
-	Id            uint64 `protobuf:"varint,1,opt,name=Id,proto3" json:"Id,omitempty"`
+	Id            uint64 `protobuf:"varint,1,opt,name=Id,proto3" json:"Id,omitempty" v:"min:1#Please select the user to be deleted."`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }

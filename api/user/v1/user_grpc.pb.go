@@ -10,6 +10,7 @@ package v1
 
 import (
 	context "context"
+
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -17,8 +18,8 @@ import (
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-// Requires gRPC-Go v1.32.0 or later.
-const _ = grpc.SupportPackageIsVersion7
+// Requires gRPC-Go v1.64.0 or later.
+const _ = grpc.SupportPackageIsVersion9
 
 const (
 	User_Create_FullMethodName  = "/user.User/Create"
@@ -46,8 +47,9 @@ func NewUserClient(cc grpc.ClientConnInterface) UserClient {
 }
 
 func (c *userClient) Create(ctx context.Context, in *CreateReq, opts ...grpc.CallOption) (*CreateRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CreateRes)
-	err := c.cc.Invoke(ctx, User_Create_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, User_Create_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -55,8 +57,9 @@ func (c *userClient) Create(ctx context.Context, in *CreateReq, opts ...grpc.Cal
 }
 
 func (c *userClient) GetOne(ctx context.Context, in *GetOneReq, opts ...grpc.CallOption) (*GetOneRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetOneRes)
-	err := c.cc.Invoke(ctx, User_GetOne_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, User_GetOne_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -64,8 +67,9 @@ func (c *userClient) GetOne(ctx context.Context, in *GetOneReq, opts ...grpc.Cal
 }
 
 func (c *userClient) GetList(ctx context.Context, in *GetListReq, opts ...grpc.CallOption) (*GetListRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetListRes)
-	err := c.cc.Invoke(ctx, User_GetList_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, User_GetList_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -73,8 +77,9 @@ func (c *userClient) GetList(ctx context.Context, in *GetListReq, opts ...grpc.C
 }
 
 func (c *userClient) Delete(ctx context.Context, in *DeleteReq, opts ...grpc.CallOption) (*DeleteRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(DeleteRes)
-	err := c.cc.Invoke(ctx, User_Delete_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, User_Delete_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -92,23 +97,27 @@ type UserServer interface {
 	mustEmbedUnimplementedUserServer()
 }
 
-// UnimplementedUserServer must be embedded to have forward compatible implementations.
-type UnimplementedUserServer struct {
-}
+// UnimplementedUserServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedUserServer struct{}
 
 func (UnimplementedUserServer) Create(context.Context, *CreateReq) (*CreateRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
+	return nil, status.Error(codes.Unimplemented, "method Create not implemented")
 }
 func (UnimplementedUserServer) GetOne(context.Context, *GetOneReq) (*GetOneRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetOne not implemented")
+	return nil, status.Error(codes.Unimplemented, "method GetOne not implemented")
 }
 func (UnimplementedUserServer) GetList(context.Context, *GetListReq) (*GetListRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetList not implemented")
+	return nil, status.Error(codes.Unimplemented, "method GetList not implemented")
 }
 func (UnimplementedUserServer) Delete(context.Context, *DeleteReq) (*DeleteRes, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+	return nil, status.Error(codes.Unimplemented, "method Delete not implemented")
 }
 func (UnimplementedUserServer) mustEmbedUnimplementedUserServer() {}
+func (UnimplementedUserServer) testEmbeddedByValue()              {}
 
 // UnsafeUserServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to UserServer will
@@ -118,6 +127,13 @@ type UnsafeUserServer interface {
 }
 
 func RegisterUserServer(s grpc.ServiceRegistrar, srv UserServer) {
+	// If the following call panics, it indicates UnimplementedUserServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
 	s.RegisterService(&User_ServiceDesc, srv)
 }
 

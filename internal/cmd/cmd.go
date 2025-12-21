@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/os/gcmd"
 	"google.golang.org/grpc"
 
+	"jh_user_service/internal/controller/admin"
 	"jh_user_service/internal/controller/user"
 	"jh_user_service/internal/registry"
 )
@@ -35,6 +36,7 @@ var (
 			)
 			s := grpcx.Server.New(c)
 			user.Register(s)
+			admin.Register(s)
 			s.Run()
 			return nil
 		},

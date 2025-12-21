@@ -11,12 +11,13 @@
 package pbentity
 
 import (
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
+
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
 const (
@@ -28,13 +29,13 @@ const (
 
 type User struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            uint32                 `protobuf:"varint,1,opt,name=Id,proto3" json:"Id,omitempty"`            // User ID
-	Passport      string                 `protobuf:"bytes,2,opt,name=Passport,proto3" json:"Passport,omitempty"` // User Passport
-	Password      string                 `protobuf:"bytes,3,opt,name=Password,proto3" json:"Password,omitempty"` // User Password
-	Nickname      string                 `protobuf:"bytes,4,opt,name=Nickname,proto3" json:"Nickname,omitempty"` // User Nickname
-	CreateAt      *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=CreateAt,proto3" json:"CreateAt,omitempty"` // Created Time
-	UpdateAt      *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=UpdateAt,proto3" json:"UpdateAt,omitempty"` // Updated Time
-	DeleteAt      *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=DeleteAt,proto3" json:"DeleteAt,omitempty"` // Deleted Time
+	Id            uint32                 `protobuf:"varint,1,opt,name=Id,proto3" json:"Id,omitempty" dc:"User ID"`                  // User ID
+	Passport      string                 `protobuf:"bytes,2,opt,name=Passport,proto3" json:"Passport,omitempty" dc:"User Passport"` // User Passport
+	Password      string                 `protobuf:"bytes,3,opt,name=Password,proto3" json:"Password,omitempty" dc:"User Password"` // User Password
+	Nickname      string                 `protobuf:"bytes,4,opt,name=Nickname,proto3" json:"Nickname,omitempty" dc:"User Nickname"` // User Nickname
+	CreateAt      *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=CreateAt,proto3" json:"CreateAt,omitempty" dc:"Created Time"`  // Created Time
+	UpdateAt      *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=UpdateAt,proto3" json:"UpdateAt,omitempty" dc:"Updated Time"`  // Updated Time
+	DeleteAt      *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=DeleteAt,proto3" json:"DeleteAt,omitempty" dc:"Deleted Time"`  // Deleted Time
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }

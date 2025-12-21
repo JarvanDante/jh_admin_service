@@ -37,9 +37,9 @@ func RegisterHTTP(s *ghttp.Server) {
 
 func (*Controller) Create(ctx context.Context, req *v1.CreateReq) (res *v1.CreateRes, err error) {
 	_, err = dao.User.Ctx(ctx).Data(do.User{
-		Passport: req.Passport,
+		Username: req.Passport,
 		Password: req.Password,
-		Nickname: req.Nickname,
+		Realname: req.Nickname,
 	}).Insert()
 	return
 }
