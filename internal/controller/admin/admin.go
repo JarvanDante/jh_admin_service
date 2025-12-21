@@ -41,39 +41,6 @@ func (*Controller) Login(ctx context.Context, req *v1.LoginReq) (res *v1.LoginRe
 	// 获取站点ID (这里需要根据实际情况获取，可能从上下文或配置中获取)
 	siteId := 1 // 临时硬编码，实际应该从请求中获取
 
-	middleware.LogWithTrace(ctx, "info", "登录请求 - 用户名: %s, 站点ID: %d", req.Username, siteId)
-
-	// 测试数据库连接和查询
-	middleware.LogWithTrace(ctx, "info", "开始数据库查询调试...")
-
-	// 查看admin表的记录数
-	countResult, countErr := dao.Admin.DB().GetValue(ctx, "SELECT COUNT(*) FROM admin")
-	if countErr != nil {
-		middleware.LogWithTrace(ctx, "error", "查询admin表记录数失败: %v", countErr)
-	} else {
-		middleware.LogWithTrace(ctx, "info", "admin表总记录数: %s", countResult.String())
-	}
-
-	// 使用DAO查询所有管理员
-	var admins []*entity.Admin
-	scanErr := dao.Admin.Ctx(ctx).Scan(&admins)
-	if scanErr != nil {
-		middleware.LogWithTrace(ctx, "error", "DAO查询失败: %v", scanErr)
-		return nil, fmt.Errorf("数据库查询错误: %v", scanErr)
-	}
-	middleware.LogWithTrace(ctx, "info", "DAO查询到 %d 条管理员记录", len(admins))
-
-	// 打印前几条记录用于调试
-	for i, admin := range admins {
-		if i >= 3 { // 只打印前3条
-			break
-		}
-		middleware.LogWithTrace(ctx, "info", "管理员 %d: ID=%d, Username=%s, Status=%d",
-			i+1, admin.Id, admin.Username, admin.Status)
-	}
-	// 查询管理员 - 使用原生SQL避免自动添加条件
-	middleware.LogWithTrace(ctx, "info", "开始查询管理员 - 用户名: %s, 站点ID: %d", req.Username, siteId)
-
 	var admin *entity.Admin
 	err = dao.Admin.Ctx(ctx).Where("username = ? AND site_id = ?", req.Username, siteId).Scan(&admin)
 
@@ -87,8 +54,6 @@ func (*Controller) Login(ctx context.Context, req *v1.LoginReq) (res *v1.LoginRe
 		return nil, fmt.Errorf("用户名或密码错误")
 	}
 
-	middleware.LogWithTrace(ctx, "info", "找到管理员记录 - ID: %d, 用户名: %s, 状态: %d", admin.Id, admin.Username, admin.Status)
-
 	// 检查状态（状态检查放在找到记录之后）
 	if admin.Status != 1 {
 		middleware.LogWithTrace(ctx, "warning", "管理员状态异常 - 用户名: %s, 状态: %d", req.Username, admin.Status)
@@ -101,8 +66,6 @@ func (*Controller) Login(ctx context.Context, req *v1.LoginReq) (res *v1.LoginRe
 		middleware.LogWithTrace(ctx, "warning", "密码验证失败 - 用户名: %s, 错误: %v", req.Username, err)
 		return nil, fmt.Errorf("用户名或密码错误")
 	}
-
-	middleware.LogWithTrace(ctx, "info", "密码验证成功 - 用户名: %s", req.Username)
 
 	// 验证Google 2FA (如果开启)
 	if admin.SwitchGoogle2Fa == 1 {
