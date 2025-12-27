@@ -6,47 +6,31 @@ import (
 	"strings"
 
 	"github.com/gogf/gf/v2/frame/g"
+	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/metadata"
 )
 
-// TraceInterceptor gRPC拦截器，用于提取和设置traceId
+// TraceInterceptor gRPC拦截器，用于OpenTelemetry trace context处理
 func TraceInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	// 从gRPC metadata中提取traceId
-	if md, ok := metadata.FromIncomingContext(ctx); ok {
-		var traceID string
+	// OpenTelemetry的gRPC拦截器已经处理了trace context的传播
+	// 这里我们只需要记录一下接收到的trace信息（可选）
 
-		// 尝试从不同的key中获取traceId
-		if values := md.Get("trace-id"); len(values) > 0 {
-			traceID = values[0]
-		} else if values := md.Get("x-trace-id"); len(values) > 0 {
-			traceID = values[0]
-		}
-
-		if traceID != "" {
-			// 将traceId添加到上下文中，供后续使用
-			ctx = context.WithValue(ctx, "traceId", traceID)
-
-			// 在日志中记录traceId的接收
-			g.Log().Debugf(ctx, "接收到traceId: %s, 方法: %s", traceID, info.FullMethod)
-
-			// 为了让GoFrame的日志系统能够识别traceId，我们可以设置到上下文中
-			// 这样所有使用该上下文的日志都会包含traceId
-			ctx = context.WithValue(ctx, "gf_trace_id", traceID)
-		}
+	if span := trace.SpanFromContext(ctx); span.SpanContext().IsValid() {
+		traceID := span.SpanContext().TraceID().String()
+		g.Log().Debugf(ctx, "处理gRPC请求: %s, TraceID: %s", info.FullMethod, traceID)
 	}
 
 	// 调用实际的处理函数
 	return handler(ctx, req)
 }
 
-// GetTraceIDFromContext 从上下文中获取traceId
+// GetTraceIDFromContext 从上下文中获取OpenTelemetry的TraceID
 func GetTraceIDFromContext(ctx context.Context) string {
-	if traceID := ctx.Value("traceId"); traceID != nil {
-		if id, ok := traceID.(string); ok {
-			return id
-		}
+	// 只使用OpenTelemetry的TraceID
+	if span := trace.SpanFromContext(ctx); span.SpanContext().IsValid() {
+		return span.SpanContext().TraceID().String()
 	}
+
 	return ""
 }
 
