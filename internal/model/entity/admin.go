@@ -26,4 +26,5 @@ type Admin struct {
 	LastLoginTime      *gtime.Time `json:"lastLoginTime"      orm:"last_login_time"      description:""`
 	CreatedAt          *gtime.Time `json:"createdAt"          orm:"created_at"           description:""`
 	UpdatedAt          *gtime.Time `json:"updatedAt"          orm:"updated_at"           description:""`
+	DeleteAt           *gtime.Time `json:"deleteAt"           orm:"delete_at"            description:""`
 }

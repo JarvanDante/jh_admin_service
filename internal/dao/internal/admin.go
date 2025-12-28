@@ -37,6 +37,7 @@ type AdminColumns struct {
 	LastLoginTime      string //
 	CreatedAt          string //
 	UpdatedAt          string //
+	DeleteAt           string //
 }
 
 // adminColumns holds the columns for the table admin.
@@ -57,6 +58,7 @@ var adminColumns = AdminColumns{
 	LastLoginTime:      "last_login_time",
 	CreatedAt:          "created_at",
 	UpdatedAt:          "updated_at",
+	DeleteAt:           "delete_at",
 }
 
 // NewAdminDao creates and returns a new DAO object for table data access.

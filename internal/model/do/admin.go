@@ -28,4 +28,5 @@ type Admin struct {
 	LastLoginTime      *gtime.Time //
 	CreatedAt          *gtime.Time //
 	UpdatedAt          *gtime.Time //
+	DeleteAt           *gtime.Time //
 }
