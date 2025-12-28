@@ -5,17 +5,9 @@
 
 package service
 
-import (
-	"context"
-
-	"jh_user_service/api/pbentity"
-)
-
 type (
-	IUser interface {
-		GetById(ctx context.Context, uid uint64) (*pbentity.User, error)
-		DeleteById(ctx context.Context, uid uint64) error
-	}
+	// 用户服务接口已删除
+	IUser interface{}
 )
 
 var (
