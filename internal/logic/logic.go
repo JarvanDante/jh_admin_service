@@ -4,6 +4,4 @@
 
 package logic
 
-import (
-	_ "jh_user_service/internal/logic/user"
-)
+// 用户逻辑导入已删除
