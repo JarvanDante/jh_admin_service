@@ -7,7 +7,6 @@ import (
 
 	"github.com/gogf/gf/contrib/rpc/grpcx/v2"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/golang-jwt/jwt/v5"
 	"go.opentelemetry.io/otel/attribute"
@@ -28,15 +27,6 @@ type Controller struct {
 
 func Register(s *grpcx.GrpcServer) {
 	v1.RegisterAdminServer(s.Server, &Controller{})
-}
-
-// RegisterHTTP 注册 HTTP 路由
-func RegisterHTTP(s *ghttp.Server) {
-	s.Group("/api/admin", func(group *ghttp.RouterGroup) {
-		group.POST("/login", (*Controller).LoginHTTP)
-		group.GET("/refresh-token", (*Controller).RefreshTokenHTTP)
-		group.POST("/create-admin", (*Controller).CreateAdminHTTP)
-	})
 }
 
 // Login 管理员登录
@@ -356,51 +346,6 @@ func (*Controller) CreateAdmin(ctx context.Context, req *v1.CreateAdminReq) (res
 
 	res = &v1.CreateAdminRes{}
 	return res, nil
-}
-
-// HTTP 处理函数
-func (c *Controller) LoginHTTP(r *ghttp.Request) {
-	var req v1.LoginReq
-	if err := r.Parse(&req); err != nil {
-		r.Response.WriteJson(g.Map{"code": 400, "msg": "参数错误"})
-		return
-	}
-
-	res, err := c.Login(r.Context(), &req)
-	if err != nil {
-		r.Response.WriteJson(g.Map{"code": 403, "msg": err.Error()})
-		return
-	}
-
-	r.Response.WriteJson(g.Map{"code": 0, "msg": "登录成功", "data": res})
-}
-
-func (c *Controller) RefreshTokenHTTP(r *ghttp.Request) {
-	var req v1.RefreshTokenReq
-
-	res, err := c.RefreshToken(r.Context(), &req)
-	if err != nil {
-		r.Response.WriteJson(g.Map{"code": 666, "msg": "刷新安全令牌失败"})
-		return
-	}
-
-	r.Response.WriteJson(g.Map{"code": 0, "msg": "刷新安全令牌成功", "data": res.Token})
-}
-
-func (c *Controller) CreateAdminHTTP(r *ghttp.Request) {
-	var req v1.CreateAdminReq
-	if err := r.Parse(&req); err != nil {
-		r.Response.WriteJson(g.Map{"code": 401, "msg": "参数错误"})
-		return
-	}
-
-	res, err := c.CreateAdmin(r.Context(), &req)
-	if err != nil {
-		r.Response.WriteJson(g.Map{"code": 500, "msg": err.Error()})
-		return
-	}
-
-	r.Response.WriteJson(g.Map{"code": 0, "msg": "添加员工成功", "data": res})
 }
 
 // 辅助函数
