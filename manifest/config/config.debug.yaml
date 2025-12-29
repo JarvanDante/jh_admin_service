@@ -1,0 +1,38 @@
+# GRPC Server.
+grpc:
+  address: ":8002"              #------不同端口
+  name: "jh_user_service_debug" #------不同服务名
+  logPath: ""
+  logStdout: true
+  errorStack: true
+  errorLogEnabled: true
+  errorLogPattern: "error-{Ymd}.log"
+  accessLogEnabled: true
+  accessLogPattern: "access-{Ymd}.log"
+
+# Consul 配置
+consul:
+  addr: "172.19.0.29:8500" # 容器内直接访问Consul
+  serviceName: "user-service-debug" #------不同的服务名
+  servicePort: 8002                 #------不同端口
+  serviceAddr: "172.19.0.31" # jh_user_service的容器IP
+
+# Global logging - JSON格式
+logger:
+  level: "all"
+  stdout: true
+  # 使用JSON格式输出
+  format: "json"
+  # 时间格式
+  timeFormat: "2006-01-02T15:04:05.000Z07:00"
+
+# Database.
+database:
+  logger:
+    level: "all"
+    stdout: true
+
+  default:
+    link: "mysql:root:654321@tcp(172.19.0.4:3306)/jh_site" # 容器内直接访问MySQL
+    debug: true
+
