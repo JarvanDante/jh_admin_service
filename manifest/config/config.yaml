@@ -13,7 +13,7 @@ grpc:
 # Consul 配置
 consul:
   addr: "172.19.0.29:8500" # 容器内直接访问Consul
-  serviceName: "admin_service"
+  serviceName: "admin-service"
   servicePort: 8001
   serviceAddr: "172.19.0.31" # jh_admin_service的容器IP
 
