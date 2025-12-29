@@ -13,12 +13,12 @@ import (
 	"go.opentelemetry.io/otel/trace"
 	"golang.org/x/crypto/bcrypt"
 
-	v1 "jh_user_service/api/admin/v1"
-	"jh_user_service/internal/dao"
-	"jh_user_service/internal/middleware"
-	"jh_user_service/internal/model/do"
-	"jh_user_service/internal/model/entity"
-	"jh_user_service/internal/tracing"
+	v1 "jh_admin_service/api/admin/v1"
+	"jh_admin_service/internal/dao"
+	"jh_admin_service/internal/middleware"
+	"jh_admin_service/internal/model/do"
+	"jh_admin_service/internal/model/entity"
+	"jh_admin_service/internal/tracing"
 )
 
 type Controller struct {

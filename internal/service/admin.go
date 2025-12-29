@@ -5,9 +5,9 @@ import (
 
 	"github.com/gogf/gf/v2/os/gtime"
 
-	"jh_user_service/internal/dao"
-	"jh_user_service/internal/model/do"
-	"jh_user_service/internal/model/entity"
+	"jh_admin_service/internal/dao"
+	"jh_admin_service/internal/model/do"
+	"jh_admin_service/internal/model/entity"
 )
 
 type sAdmin struct{}

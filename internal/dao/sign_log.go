@@ -5,7 +5,7 @@
 package dao
 
 import (
-	"jh_user_service/internal/dao/internal"
+	"jh_admin_service/internal/dao/internal"
 )
 
 // signLogDao is the data access object for the table sign_log.

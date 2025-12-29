@@ -11,12 +11,12 @@ import (
 	"github.com/gogf/gf/v2/os/gcmd"
 	"google.golang.org/grpc"
 
-	"jh_user_service/internal/controller/admin"
-	"jh_user_service/internal/controller/role"
-	"jh_user_service/internal/controller/site"
-	"jh_user_service/internal/middleware"
-	"jh_user_service/internal/registry"
-	"jh_user_service/internal/tracing"
+	"jh_admin_service/internal/controller/admin"
+	"jh_admin_service/internal/controller/role"
+	"jh_admin_service/internal/controller/site"
+	"jh_admin_service/internal/middleware"
+	"jh_admin_service/internal/registry"
+	"jh_admin_service/internal/tracing"
 )
 
 var (
@@ -27,7 +27,7 @@ var (
 		Brief: "start grpc server of jinhuang",
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
 			// 强制输出到stdout确保能看到
-			fmt.Println("=== jh_user_service 启动 ===")
+			fmt.Println("=== jh_admin_service 启动 ===")
 			fmt.Printf("启动时间: %s\n", time.Now().Format("2006-01-02 15:04:05"))
 			fmt.Printf("进程ID: %d\n", os.Getpid())
 			fmt.Println("==============================")

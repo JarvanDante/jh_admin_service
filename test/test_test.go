@@ -9,7 +9,7 @@ import (
 	"github.com/gogf/gf/v2/os/gctx"
 	"github.com/gogf/gf/v2/test/gtest"
 
-	v1 "jh_user_service/api/user/v1"
+	v1 "jh_admin_service/api/user/v1"
 )
 
 func Test_Create(t *testing.T) {

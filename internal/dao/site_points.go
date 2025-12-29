@@ -5,7 +5,7 @@
 package dao
 
 import (
-	"jh_user_service/internal/dao/internal"
+	"jh_admin_service/internal/dao/internal"
 )
 
 // sitePointsDao is the data access object for the table site_points.

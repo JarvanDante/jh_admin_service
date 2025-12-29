@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/gogf/gf/contrib/rpc/grpcx/v2"
-	v1 "jh_user_service/api/site/v1"
-	"jh_user_service/internal/service"
+	v1 "jh_admin_service/api/site/v1"
+	"jh_admin_service/internal/service"
 )
 
 type Controller struct {

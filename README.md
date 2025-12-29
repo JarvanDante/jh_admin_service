@@ -13,7 +13,7 @@
 ## 项目结构
 
 ```
-jh_user_service/
+jh_admin_service/
 ├── main.go                          # 入口文件
 ├── manifest/
 │   ├── config/
@@ -52,7 +52,7 @@ jh_user_service/
 # GRPC Server
 grpc:
   address: ":8002" # gRPC 服务端口
-  name: "jh_user_service" # 服务名称
+  name: "jh_admin_service" # 服务名称
   logPath: "" # 日志路径
   logStdout: true # 控制台输出
   errorStack: true # 错误堆栈
@@ -64,7 +64,7 @@ grpc:
 # Consul 配置
 consul:
   addr: "172.19.0.29:8500" # Consul 地址
-  serviceName: "user-service" # 在 Consul 中的服务名
+  serviceName: "admin_service" # 在 Consul 中的服务名
   servicePort: 8002 # 服务端口
   serviceAddr: "172.19.0.31" # 服务地址
 
@@ -148,13 +148,13 @@ message DeleteReq {
 docker-compose up --build
 
 # 单独启动用户服务容器
-docker-compose up jh_user_service
+docker-compose up jh_admin_service
 
 # 进入容器
-docker-compose exec jh_user_service bash
+docker-compose exec jh_admin_service bash
 
 # 在容器内启动服务
-cd /var/www/html/jh/jh_user_service
+cd /var/www/html/jh/jh_admin_service
 go run main.go
 ```
 
@@ -201,7 +201,7 @@ CREATE TABLE `user` (
 
 服务启动时会自动注册到 Consul：
 
-1. **服务名**: `user-service`
+1. **服务名**: `admin_service`
 2. **地址**: `172.19.0.31:8002`
 3. **健康检查**: TCP 连接检查
 4. **检查间隔**: 15 秒
@@ -214,13 +214,13 @@ CREATE TABLE `user` (
 1. 配置 Proto 文件路径：
 
    ```
-   /path/to/jh_user_service/manifest/protobuf/user/v1/user.proto
+   /path/to/jh_admin_service/manifest/protobuf/user/v1/user.proto
    ```
 
 2. 设置依赖目录：
 
    ```
-   /path/to/jh_user_service/manifest/protobuf
+   /path/to/jh_admin_service/manifest/protobuf
    ```
 
 3. 连接地址：
@@ -262,17 +262,17 @@ grpcurl -plaintext -d '{"Id":1}' 172.19.0.31:8002 user.User/GetOne
 
 ```bash
 # 检查服务是否在 Consul 中注册
-curl http://localhost:8500/v1/catalog/service/user-service
+curl http://localhost:8500/v1/catalog/service/admin_service
 
 # 检查服务健康状态
-curl http://localhost:8500/v1/health/service/user-service
+curl http://localhost:8500/v1/health/service/admin_service
 ```
 
 ### 日志查看
 
 ```bash
 # Docker 方式
-docker-compose logs -f jh_user_service
+docker-compose logs -f jh_admin_service
 
 # 本地方式
 查看控制台输出和日志文件

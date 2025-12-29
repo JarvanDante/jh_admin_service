@@ -5,7 +5,7 @@
 package dao
 
 import (
-	"jh_user_service/internal/dao/internal"
+	"jh_admin_service/internal/dao/internal"
 )
 
 // siteRegisterDao is the data access object for the table site_register.

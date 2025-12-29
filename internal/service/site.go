@@ -8,7 +8,7 @@ package service
 import (
 	"context"
 
-	v1 "jh_user_service/api/site/v1"
+	v1 "jh_admin_service/api/site/v1"
 )
 
 type (

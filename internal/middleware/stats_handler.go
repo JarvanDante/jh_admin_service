@@ -70,7 +70,7 @@ func (h *TraceStatsHandler) handleRPCBegin(ctx context.Context, stat *stats.Begi
 	traceID := GetTraceIDFromContext(ctx)
 
 	logData := g.Map{
-		"service":    "user-service",
+		"service":    "admin_service",
 		"trace_id":   traceID,
 		"event":      "rpc_begin",
 		"client":     stat.Client,
@@ -85,7 +85,7 @@ func (h *TraceStatsHandler) handleInPayload(ctx context.Context, stat *stats.InP
 	traceID := GetTraceIDFromContext(ctx)
 
 	logData := g.Map{
-		"service":        "user-service",
+		"service":        "admin_service",
 		"trace_id":       traceID,
 		"event":          "in_payload",
 		"payload_length": stat.Length,
@@ -101,7 +101,7 @@ func (h *TraceStatsHandler) handleOutPayload(ctx context.Context, stat *stats.Ou
 	traceID := GetTraceIDFromContext(ctx)
 
 	logData := g.Map{
-		"service":        "user-service",
+		"service":        "admin_service",
 		"trace_id":       traceID,
 		"event":          "out_payload",
 		"payload_length": stat.Length,
@@ -123,7 +123,7 @@ func (h *TraceStatsHandler) handleRPCEnd(ctx context.Context, stat *stats.End) {
 	}
 
 	logData := g.Map{
-		"service":  "user-service",
+		"service":  "admin_service",
 		"trace_id": traceID,
 		"event":    "rpc_end",
 		"end_time": stat.EndTime.Format(time.RFC3339Nano),

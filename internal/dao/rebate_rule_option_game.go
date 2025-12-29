@@ -5,7 +5,7 @@
 package dao
 
 import (
-	"jh_user_service/internal/dao/internal"
+	"jh_admin_service/internal/dao/internal"
 )
 
 // rebateRuleOptionGameDao is the data access object for the table rebate_rule_option_game.

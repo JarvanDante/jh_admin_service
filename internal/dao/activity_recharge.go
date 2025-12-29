@@ -5,7 +5,7 @@
 package dao
 
 import (
-	"jh_user_service/internal/dao/internal"
+	"jh_admin_service/internal/dao/internal"
 )
 
 // activityRechargeDao is the data access object for the table activity_recharge.

@@ -1,4 +1,4 @@
-module jh_user_service
+module jh_admin_service
 
 go 1.25.3
 

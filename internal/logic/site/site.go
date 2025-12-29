@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	v1 "jh_user_service/api/site/v1"
-	"jh_user_service/internal/dao"
-	"jh_user_service/internal/middleware"
-	"jh_user_service/internal/model/do"
-	"jh_user_service/internal/model/entity"
-	"jh_user_service/internal/service"
+	v1 "jh_admin_service/api/site/v1"
+	"jh_admin_service/internal/dao"
+	"jh_admin_service/internal/middleware"
+	"jh_admin_service/internal/model/do"
+	"jh_admin_service/internal/model/entity"
+	"jh_admin_service/internal/service"
 
 	"github.com/gogf/gf/v2/frame/g"
 )

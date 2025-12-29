@@ -40,7 +40,7 @@ func LogWithTrace(ctx context.Context, level string, message string, args ...int
 
 	// 构建结构化日志数据
 	logData := g.Map{
-		"service":  "user-service",
+		"service":  "admin_service",
 		"trace_id": traceID,
 		"msg":      fmt.Sprintf(message, args...),
 	}
@@ -68,7 +68,7 @@ func LogWithTraceAndFields(ctx context.Context, level string, message string, fi
 
 	// 构建结构化日志数据
 	logData := g.Map{
-		"service":  "user-service",
+		"service":  "admin_service",
 		"trace_id": traceID,
 		"msg":      fmt.Sprintf(message, args...),
 	}

@@ -7,7 +7,7 @@ package service
 import (
 	"context"
 
-	v1 "jh_user_service/api/role/v1"
+	v1 "jh_admin_service/api/role/v1"
 )
 
 type (

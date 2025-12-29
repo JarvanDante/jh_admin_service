@@ -5,6 +5,6 @@
 package logic
 
 import (
-	_ "jh_user_service/internal/logic/role"
-	_ "jh_user_service/internal/logic/site"
+	_ "jh_admin_service/internal/logic/role"
+	_ "jh_admin_service/internal/logic/site"
 )

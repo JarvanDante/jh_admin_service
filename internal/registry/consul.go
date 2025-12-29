@@ -52,12 +52,12 @@ func RegisterService() error {
 
 func DeregisterService() error {
 	ctx := context.Background()
-	serviceID := "jh_user_service-1"
+	serviceID := "jh_admin_service-1"
 
 	if err := client.Agent().ServiceDeregister(serviceID); err != nil {
 		return fmt.Errorf("deregister service failed: %v", err)
 	}
 
-	g.Log().Infof(ctx, "service deregistered: jh_user_service")
+	g.Log().Infof(ctx, "service deregistered: jh_admin_service")
 	return nil
 }
