@@ -29,6 +29,38 @@ jaeger:
 jwt:
   secret: "be0axSSXmguDZ2Q0EIPgRwq9e5G9nRH3zq3iEw6nllU="
 
+# MinIO 配置
+minio:
+  endpoint: "172.19.0.23:9000" # MinIO 服务地址
+  accessKey: "minioadmin" # 访问密钥
+  secretKey: "minioadmin123" # 秘密密钥
+  bucket: "uploads" # 存储桶名称
+  useSSL: false # 是否使用SSL
+  publicURL: "http://localhost:19000" # 公网访问地址
+
+# 站点配置
+site:
+  code: "site_1" # 站点代码
+
+# 上传配置
+upload:
+  default:
+    imgType:
+      - "image/jpg"
+      - "image/jpeg"
+      - "image/gif"
+      - "image/png"
+    maxSize: 500 # KB
+  mobile_logo:
+    imgType:
+      - "image/svg+xml"
+    maxSize: 100 # KB
+
+# Workerman 配置 (用于Socket地址)
+workerman:
+  host: "localhost"
+  port: "2346"
+
 # Global logging - JSON格式
 logger:
   level: "all"

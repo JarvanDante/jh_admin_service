@@ -6,6 +6,7 @@ import (
 	"jh_admin_service/internal/controller/backend/admin"
 	"jh_admin_service/internal/controller/backend/role"
 	"jh_admin_service/internal/controller/backend/site"
+	"jh_admin_service/internal/controller/backend/upload"
 	"os"
 	"time"
 
@@ -69,6 +70,7 @@ var (
 			admin.Register(s)
 			site.Register(s)
 			role.Register(s)
+			upload.Register(s)
 
 			fmt.Println("gRPC服务器启动中...")
 

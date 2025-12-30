@@ -20,8 +20,9 @@ main
 temp/
 
 # 忽略 gf gen pb 自动生成的控制器文件
-internal/controller/admin/
-internal/controller/role/
-internal/controller/site/
-# 保留 backend 目录
+# 忽略 controller 下所有内容
+internal/controller/*
+
+# 但保留 backend 目录
 !internal/controller/backend/
+!internal/controller/backend/**
