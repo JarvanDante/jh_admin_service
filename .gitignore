@@ -18,3 +18,10 @@ cbuild
 main
 .vscode
 temp/
+
+# 忽略 gf gen pb 自动生成的控制器文件
+internal/controller/admin/
+internal/controller/role/
+internal/controller/site/
+# 保留 backend 目录
+!internal/controller/backend/

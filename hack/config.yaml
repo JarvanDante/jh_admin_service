@@ -3,11 +3,20 @@ gfcli:
   gen:
     dao:
       - link: "mysql:root:654321@tcp(127.0.0.1:3306)/jh_site"
-#        tables: "user"
+        #        tables: "user"
         removePrefix: "gf_"
         descriptionTag: true
         noModelComment: true
 
     pbentity:
       - link: "mysql:root:654321@tcp(127.0.0.1:3306)/jh_site"
-#        tables: "user"
+    #        tables: "user"
+
+    # protobuf 生成配置
+    pb:
+      # 禁用自动生成控制器
+      controller: false
+      # 或者指定生成路径
+      # controllerPath: "internal/controller/generated"
+      # 只生成 pb 文件，不生成控制器
+      onlyPb: true

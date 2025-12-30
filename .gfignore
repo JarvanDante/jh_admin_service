@@ -1,0 +1,7 @@
+# 忽略自动生成的控制器文件
+internal/controller/admin/
+internal/controller/role/
+internal/controller/site/
+
+# 保留 backend 目录下的控制器
+!internal/controller/backend/
