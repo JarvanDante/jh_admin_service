@@ -31,9 +31,25 @@ func (s *sSite) GetBasicSetting(ctx context.Context, req *v1.GetBasicSettingReq)
 		siteId = req.SiteId
 	}
 
+	// 查询站点基本信息
+	var siteInfo *entity.Site
+	err := dao.Site.Ctx(ctx).Where(do.Site{
+		Id: siteId,
+	}).Scan(&siteInfo)
+
+	if err != nil {
+		middleware.LogWithTrace(ctx, "error", "查询站点信息失败: %v", err)
+		return nil, fmt.Errorf("查询站点信息失败: %v", err)
+	}
+
+	if siteInfo == nil {
+		middleware.LogWithTrace(ctx, "error", "站点信息不存在 - SiteId: %d", siteId)
+		return nil, fmt.Errorf("站点信息不存在")
+	}
+
 	// 查询站点配置
 	var siteConfig *entity.SiteConfig
-	err := dao.SiteConfig.Ctx(ctx).Where(do.SiteConfig{
+	err = dao.SiteConfig.Ctx(ctx).Where(do.SiteConfig{
 		SiteId: siteId,
 	}).Scan(&siteConfig)
 
@@ -49,8 +65,8 @@ func (s *sSite) GetBasicSetting(ctx context.Context, req *v1.GetBasicSettingReq)
 
 	// 构建响应数据
 	res := &v1.GetBasicSettingRes{
-		Code:                 fmt.Sprintf("site_%d", siteId), // 站点代码
-		Name:                 fmt.Sprintf("站点_%d", siteId),   // 站点名称，这里可以从其他表获取
+		Code:                 siteInfo.Code, // 从site表获取站点代码
+		Name:                 siteInfo.Name, // 从site表获取站点名称
 		RegisterTimeInterval: int32(siteConfig.RegisterTimeInterval),
 		SwitchRegister:       siteConfig.SwitchRegister == 1,
 		IsClose:              siteConfig.IsClose == 1,
