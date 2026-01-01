@@ -28,6 +28,7 @@ const (
 	Admin_DeleteAdmin_FullMethodName    = "/admin.Admin/DeleteAdmin"
 	Admin_Logout_FullMethodName         = "/admin.Admin/Logout"
 	Admin_ChangePassword_FullMethodName = "/admin.Admin/ChangePassword"
+	Admin_GetAdminLogs_FullMethodName   = "/admin.Admin/GetAdminLogs"
 )
 
 // AdminClient is the client API for Admin service.
@@ -42,6 +43,7 @@ type AdminClient interface {
 	DeleteAdmin(ctx context.Context, in *DeleteAdminReq, opts ...grpc.CallOption) (*DeleteAdminRes, error)
 	Logout(ctx context.Context, in *LogoutReq, opts ...grpc.CallOption) (*LogoutRes, error)
 	ChangePassword(ctx context.Context, in *ChangePasswordReq, opts ...grpc.CallOption) (*ChangePasswordRes, error)
+	GetAdminLogs(ctx context.Context, in *GetAdminLogsReq, opts ...grpc.CallOption) (*GetAdminLogsRes, error)
 }
 
 type adminClient struct {
@@ -132,6 +134,16 @@ func (c *adminClient) ChangePassword(ctx context.Context, in *ChangePasswordReq,
 	return out, nil
 }
 
+func (c *adminClient) GetAdminLogs(ctx context.Context, in *GetAdminLogsReq, opts ...grpc.CallOption) (*GetAdminLogsRes, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetAdminLogsRes)
+	err := c.cc.Invoke(ctx, Admin_GetAdminLogs_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AdminServer is the server API for Admin service.
 // All implementations must embed UnimplementedAdminServer
 // for forward compatibility.
@@ -144,6 +156,7 @@ type AdminServer interface {
 	DeleteAdmin(context.Context, *DeleteAdminReq) (*DeleteAdminRes, error)
 	Logout(context.Context, *LogoutReq) (*LogoutRes, error)
 	ChangePassword(context.Context, *ChangePasswordReq) (*ChangePasswordRes, error)
+	GetAdminLogs(context.Context, *GetAdminLogsReq) (*GetAdminLogsRes, error)
 	mustEmbedUnimplementedAdminServer()
 }
 
@@ -177,6 +190,9 @@ func (UnimplementedAdminServer) Logout(context.Context, *LogoutReq) (*LogoutRes,
 }
 func (UnimplementedAdminServer) ChangePassword(context.Context, *ChangePasswordReq) (*ChangePasswordRes, error) {
 	return nil, status.Error(codes.Unimplemented, "method ChangePassword not implemented")
+}
+func (UnimplementedAdminServer) GetAdminLogs(context.Context, *GetAdminLogsReq) (*GetAdminLogsRes, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetAdminLogs not implemented")
 }
 func (UnimplementedAdminServer) mustEmbedUnimplementedAdminServer() {}
 func (UnimplementedAdminServer) testEmbeddedByValue()               {}
@@ -343,6 +359,24 @@ func _Admin_ChangePassword_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Admin_GetAdminLogs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAdminLogsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServer).GetAdminLogs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Admin_GetAdminLogs_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServer).GetAdminLogs(ctx, req.(*GetAdminLogsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Admin_ServiceDesc is the grpc.ServiceDesc for Admin service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -381,6 +415,10 @@ var Admin_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ChangePassword",
 			Handler:    _Admin_ChangePassword_Handler,
+		},
+		{
+			MethodName: "GetAdminLogs",
+			Handler:    _Admin_GetAdminLogs_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

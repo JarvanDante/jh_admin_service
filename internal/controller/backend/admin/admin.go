@@ -55,3 +55,8 @@ func (*Controller) Logout(ctx context.Context, req *v2.LogoutReq) (res *v2.Logou
 func (*Controller) ChangePassword(ctx context.Context, req *v2.ChangePasswordReq) (res *v2.ChangePasswordRes, err error) {
 	return backend.Admin().ChangePassword(ctx, req)
 }
+
+// GetAdminLogs 获取管理员日志列表
+func (*Controller) GetAdminLogs(ctx context.Context, req *v2.GetAdminLogsReq) (res *v2.GetAdminLogsRes, err error) {
+	return backend.Admin().GetAdminLogs(ctx, req)
+}

@@ -21,6 +21,7 @@ type (
 		DeleteAdmin(ctx context.Context, req *v1.DeleteAdminReq) (*v1.DeleteAdminRes, error)
 		Logout(ctx context.Context, req *v1.LogoutReq) (*v1.LogoutRes, error)
 		ChangePassword(ctx context.Context, req *v1.ChangePasswordReq) (*v1.ChangePasswordRes, error)
+		GetAdminLogs(ctx context.Context, req *v1.GetAdminLogsReq) (*v1.GetAdminLogsRes, error)
 	}
 )
 

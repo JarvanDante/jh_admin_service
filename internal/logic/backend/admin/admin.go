@@ -1016,3 +1016,116 @@ func (s *sAdmin) addAdminLog(ctx context.Context, admin *entity.Admin, message s
 	})
 	return err
 }
+
+// GetAdminLogs 获取管理员日志列表
+func (s *sAdmin) GetAdminLogs(ctx context.Context, req *v1.GetAdminLogsReq) (*v1.GetAdminLogsRes, error) {
+	// 参数验证
+	if req == nil {
+		return nil, fmt.Errorf("请求参数不能为空")
+	}
+
+	// 创建Jaeger span
+	ctx, span := tracing.StartSpan(ctx, "admin.GetAdminLogs", trace.WithAttributes(
+		attribute.String("method", "GetAdminLogs"),
+		attribute.String("username", req.Username),
+		attribute.Int("page", int(req.Page)),
+		attribute.Int("size", int(req.Size)),
+	))
+	defer span.End()
+
+	// 获取站点ID (从上下文或配置中获取)
+	siteId := 1 // 临时硬编码，实际应该从请求中获取
+	tracing.SetSpanAttributes(span, attribute.Int("site_id", siteId))
+
+	// 设置默认分页参数
+	page := req.Page
+	size := req.Size
+	if page <= 0 {
+		page = 1
+	}
+	if size <= 0 {
+		size = 50
+	}
+
+	// 构建查询条件
+	query := dao.AdminLog.Ctx(ctx).Where(do.AdminLog{
+		SiteId: siteId,
+	})
+
+	// 用户名筛选
+	if req.Username != "" {
+		query = query.Where(do.AdminLog{
+			AdminUsername: req.Username,
+		})
+	}
+
+	// 时间范围筛选
+	if req.Start != "" && req.End != "" {
+		query = query.WhereBetween("created_at", req.Start, req.End)
+	}
+
+	// 数据库查询span - 获取总数
+	ctx, countSpan := tracing.StartSpan(ctx, "db.query.admin_log_count", trace.WithAttributes(
+		attribute.String("db.operation", "count"),
+		attribute.String("db.table", "admin_log"),
+	))
+	total, err := query.Count()
+	countSpan.End()
+	if err != nil {
+		tracing.SetSpanError(span, err)
+		return nil, fmt.Errorf("获取管理员日志总数失败: %v", err)
+	}
+
+	// 数据库查询span - 获取列表数据
+	ctx, listSpan := tracing.StartSpan(ctx, "db.query.admin_log_list", trace.WithAttributes(
+		attribute.String("db.operation", "select"),
+		attribute.String("db.table", "admin_log"),
+		attribute.Int("limit", int(size)),
+		attribute.Int("offset", int((page-1)*size)),
+	))
+
+	var logs []entity.AdminLog
+	err = query.Fields("admin_username", "ip", "remark", "created_at").
+		Page(int(page), int(size)).
+		OrderDesc("created_at").
+		Scan(&logs)
+	listSpan.End()
+
+	if err != nil {
+		tracing.SetSpanError(span, err)
+		return nil, fmt.Errorf("获取管理员日志列表失败: %v", err)
+	}
+
+	// 转换为响应格式
+	var logList []*v1.AdminLogInfo
+	for _, log := range logs {
+		createdAt := ""
+		if log.CreatedAt != nil {
+			createdAt = log.CreatedAt.Format("2006-01-02 15:04:05")
+		}
+
+		logList = append(logList, &v1.AdminLogInfo{
+			Username:  log.AdminUsername,
+			Ip:        log.Ip,
+			Remark:    log.Remark,
+			CreatedAt: createdAt,
+		})
+	}
+
+	// 确保返回空数组而不是nil
+	if logList == nil {
+		logList = []*v1.AdminLogInfo{}
+	}
+
+	tracing.SetSpanAttributes(span,
+		attribute.Int("total_count", total),
+		attribute.Int("returned_count", len(logList)),
+	)
+
+	middleware.LogWithTrace(ctx, "info", fmt.Sprintf("获取管理员日志列表成功，总数: %d，返回: %d", total, len(logList)))
+
+	return &v1.GetAdminLogsRes{
+		List:  logList,
+		Count: int32(total),
+	}, nil
+}
