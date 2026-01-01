@@ -518,24 +518,54 @@ func (s *sAdmin) GetAdminList(ctx context.Context, req *v1.GetAdminListReq) (*v1
 
 	// 转换为响应格式
 	var adminList []*v1.AdminInfo
+
+	// 预先获取所有角色信息，避免N+1查询问题
+	var roleIds []interface{}
+	for _, admin := range admins {
+		if admin.AdminRoleId > 0 {
+			roleIds = append(roleIds, admin.AdminRoleId)
+		}
+	}
+
+	roleMap := make(map[int]string)
+	if len(roleIds) > 0 {
+		var roles []*entity.AdminRole
+		err := dao.AdminRole.Ctx(ctx).WhereIn(dao.AdminRole.Columns().Id, roleIds).Scan(&roles)
+		if err == nil {
+			for _, role := range roles {
+				roleMap[int(role.Id)] = role.Name
+			}
+		}
+	}
+
 	for _, admin := range admins {
 		adminInfo := &v1.AdminInfo{
-			Id:       int32(admin.Id),
-			Username: admin.Username,
-			Nickname: admin.Nickname,
-			Role:     int32(admin.AdminRoleId),
-			Status:   int32(admin.Status),
+			Id:          int32(admin.Id),
+			Username:    admin.Username,
+			Nickname:    admin.Nickname,
+			Role:        int32(admin.AdminRoleId),
+			Status:      int32(admin.Status),
+			LastLoginIp: admin.LastLoginIp, // 直接赋值，即使为空字符串
+		}
+
+		// 设置角色名称
+		if roleName, exists := roleMap[admin.AdminRoleId]; exists {
+			adminInfo.RoleName = roleName
+		} else {
+			adminInfo.RoleName = ""
 		}
 
 		// 格式化时间
 		if admin.LastLoginTime != nil {
 			adminInfo.LastLoginTime = admin.LastLoginTime.Format("2006-01-02 15:04:05")
+		} else {
+			adminInfo.LastLoginTime = "" // 确保字段存在
 		}
+
 		if admin.CreatedAt != nil {
 			adminInfo.CreatedAt = admin.CreatedAt.Format("2006-01-02 15:04:05")
-		}
-		if admin.LastLoginIp != "" {
-			adminInfo.LastLoginIp = admin.LastLoginIp
+		} else {
+			adminInfo.CreatedAt = ""
 		}
 
 		adminList = append(adminList, adminInfo)
