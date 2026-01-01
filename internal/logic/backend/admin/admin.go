@@ -540,12 +540,14 @@ func (s *sAdmin) GetAdminList(ctx context.Context, req *v1.GetAdminListReq) (*v1
 
 	for _, admin := range admins {
 		adminInfo := &v1.AdminInfo{
-			Id:          int32(admin.Id),
-			Username:    admin.Username,
-			Nickname:    admin.Nickname,
-			Role:        int32(admin.AdminRoleId),
-			Status:      int32(admin.Status),
-			LastLoginIp: admin.LastLoginIp, // 直接赋值，即使为空字符串
+			Id:            int32(admin.Id),
+			Username:      admin.Username,
+			Nickname:      admin.Nickname,
+			Role:          int32(admin.AdminRoleId),
+			Status:        int32(admin.Status),
+			LastLoginIp:   admin.LastLoginIp, // 直接赋值，即使为空字符串
+			LastLoginTime: admin.LastLoginTime.Format("2006-01-02 15:04:05"),
+			CreatedAt:     admin.CreatedAt.Format("2006-01-02 15:04:05"),
 		}
 
 		// 设置角色名称
@@ -553,19 +555,6 @@ func (s *sAdmin) GetAdminList(ctx context.Context, req *v1.GetAdminListReq) (*v1
 			adminInfo.RoleName = roleName
 		} else {
 			adminInfo.RoleName = ""
-		}
-
-		// 格式化时间
-		if admin.LastLoginTime != nil {
-			adminInfo.LastLoginTime = admin.LastLoginTime.Format("2006-01-02 15:04:05")
-		} else {
-			adminInfo.LastLoginTime = "" // 确保字段存在
-		}
-
-		if admin.CreatedAt != nil {
-			adminInfo.CreatedAt = admin.CreatedAt.Format("2006-01-02 15:04:05")
-		} else {
-			adminInfo.CreatedAt = ""
 		}
 
 		adminList = append(adminList, adminInfo)
