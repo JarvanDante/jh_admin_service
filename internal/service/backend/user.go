@@ -10,6 +10,11 @@ type (
 		GetUserList(ctx context.Context, req *v1.GetUserListReq) (*v1.GetUserListRes, error)
 		UpdateUser(ctx context.Context, req *v1.UpdateUserReq) (*v1.UpdateUserRes, error)
 		GetUserBasicInfo(ctx context.Context, req *v1.GetUserBasicInfoReq) (*v1.GetUserBasicInfoRes, error)
+
+		// UserGrade相关方法
+		GetUserGrades(ctx context.Context, req *v1.GetUserGradesReq) (*v1.GetUserGradesRes, error)
+		SaveUserGrades(ctx context.Context, req *v1.SaveUserGradesReq) (*v1.SaveUserGradesRes, error)
+		DeleteUserGrades(ctx context.Context, req *v1.DeleteUserGradesReq) (*v1.DeleteUserGradesRes, error)
 	}
 )
 

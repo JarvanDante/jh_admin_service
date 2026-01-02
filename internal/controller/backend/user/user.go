@@ -30,3 +30,18 @@ func (*Controller) UpdateUser(ctx context.Context, req *v1.UpdateUserReq) (res *
 func (*Controller) GetUserBasicInfo(ctx context.Context, req *v1.GetUserBasicInfoReq) (res *v1.GetUserBasicInfoRes, err error) {
 	return backend.User().GetUserBasicInfo(ctx, req)
 }
+
+// GetUserGrades 获取用户等级列表
+func (*Controller) GetUserGrades(ctx context.Context, req *v1.GetUserGradesReq) (res *v1.GetUserGradesRes, err error) {
+	return backend.User().GetUserGrades(ctx, req)
+}
+
+// SaveUserGrades 保存用户等级
+func (*Controller) SaveUserGrades(ctx context.Context, req *v1.SaveUserGradesReq) (res *v1.SaveUserGradesRes, err error) {
+	return backend.User().SaveUserGrades(ctx, req)
+}
+
+// DeleteUserGrades 删除用户等级
+func (*Controller) DeleteUserGrades(ctx context.Context, req *v1.DeleteUserGradesReq) (res *v1.DeleteUserGradesRes, err error) {
+	return backend.User().DeleteUserGrades(ctx, req)
+}

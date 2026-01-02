@@ -6,6 +6,7 @@ import (
 	v1 "jh_admin_service/api/backend/user/v1"
 	"jh_admin_service/internal/service/backend"
 
+	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"go.opentelemetry.io/otel/attribute"
@@ -197,10 +198,10 @@ func (s *sUser) GetUserList(ctx context.Context, req *v1.GetUserListReq) (*v1.Ge
 
 		// 获取等级名称
 		var grade entity.UserGrade
-		dao.UserGrade.Ctx(ctx).Where(do.UserGrade{
-			SiteId: siteId,
-			Id:     uint(user.GradeId),
-		}).Scan(&grade)
+		dao.UserGrade.DB().Model(dao.UserGrade.Table()).
+			Where(dao.UserGrade.Columns().SiteId, siteId).
+			Where(dao.UserGrade.Columns().Id, user.GradeId).
+			Scan(&grade)
 		userInfo.GradeName = grade.Name
 
 		// 获取层级名称
@@ -400,10 +401,10 @@ func (s *sUser) GetUserBasicInfo(ctx context.Context, req *v1.GetUserBasicInfoRe
 
 	// 获取等级名称
 	var grade entity.UserGrade
-	dao.UserGrade.Ctx(ctx).Where(do.UserGrade{
-		SiteId: siteId,
-		Id:     uint(user.GradeId),
-	}).Scan(&grade)
+	dao.UserGrade.DB().Model(dao.UserGrade.Table()).
+		Where(dao.UserGrade.Columns().SiteId, siteId).
+		Where(dao.UserGrade.Columns().Id, user.GradeId).
+		Scan(&grade)
 	basicInfo.GradeName = grade.Name
 
 	// 获取层级名称
@@ -467,4 +468,264 @@ func (s *sUser) maskMobile(mobile string) string {
 		return mobile
 	}
 	return mobile[:3] + "****" + mobile[len(mobile)-4:]
+}
+
+// GetUserGrades 获取用户等级列表
+func (s *sUser) GetUserGrades(ctx context.Context, req *v1.GetUserGradesReq) (*v1.GetUserGradesRes, error) {
+	// 参数验证
+	if req == nil {
+		return nil, fmt.Errorf("请求参数不能为空")
+	}
+
+	// 创建Jaeger span
+	ctx, span := tracing.StartSpan(ctx, "user.GetUserGrades", trace.WithAttributes(
+		attribute.String("method", "GetUserGrades"),
+		attribute.Int("site_id", int(req.SiteId)),
+	))
+	defer span.End()
+
+	// 获取用户等级列表
+	grades, err := s.getUserGradeList(ctx, int(req.SiteId))
+	if err != nil {
+		tracing.SetSpanError(span, err)
+		return &v1.GetUserGradesRes{
+			Code:    500,
+			Message: "获取数据失败: " + err.Error(),
+		}, nil
+	}
+
+	// 转换数据格式
+	var gradeInfos []*v1.UserGradeInfo
+	for _, grade := range grades {
+		// 获取该等级的用户数量
+		userCount, _ := s.getUserCountByGrade(ctx, int(req.SiteId), grade.Id)
+
+		gradeInfo := &v1.UserGradeInfo{
+			Id:                   int32(grade.Id),
+			Name:                 grade.Name,
+			PointsUpgrade:        int32(grade.PointsUpgrade),
+			BonusUpgrade:         grade.BonusUpgrade,
+			BonusBirthday:        grade.BonusBirthday,
+			RebatePercentSports:  grade.RebatePercentSports,
+			RebatePercentLottery: grade.RebatePercentLottery,
+			RebatePercentLive:    grade.RebatePercentLive,
+			RebatePercentEgame:   grade.RebatePercentEgame,
+			RebatePercentPoker:   grade.RebatePercentPoker,
+			UserCount:            int32(userCount),
+			FieldsDisable:        grade.FieldsDisable,
+			AutoProviding:        grade.AutoProviding,
+			Activities:           []string{}, // TODO: 实现活动关联逻辑
+		}
+		gradeInfos = append(gradeInfos, gradeInfo)
+	}
+
+	tracing.SetSpanAttributes(span, attribute.Bool("success", true))
+	return &v1.GetUserGradesRes{
+		Code:    200,
+		Message: "获取数据成功",
+		Data:    gradeInfos,
+	}, nil
+}
+
+// SaveUserGrades 保存用户等级
+func (s *sUser) SaveUserGrades(ctx context.Context, req *v1.SaveUserGradesReq) (*v1.SaveUserGradesRes, error) {
+	// 参数验证
+	if req == nil {
+		return nil, fmt.Errorf("请求参数不能为空")
+	}
+
+	// 创建Jaeger span
+	ctx, span := tracing.StartSpan(ctx, "user.SaveUserGrades", trace.WithAttributes(
+		attribute.String("method", "SaveUserGrades"),
+		attribute.Int("site_id", int(req.SiteId)),
+		attribute.Int("grade_count", len(req.Data)),
+	))
+	defer span.End()
+
+	// 转换数据格式
+	var grades []*entity.UserGrade
+	for _, gradeInfo := range req.Data {
+		grade := &entity.UserGrade{
+			Id:                   int(gradeInfo.Id),
+			Name:                 gradeInfo.Name,
+			PointsUpgrade:        int(gradeInfo.PointsUpgrade),
+			BonusUpgrade:         gradeInfo.BonusUpgrade,
+			BonusBirthday:        gradeInfo.BonusBirthday,
+			RebatePercentSports:  gradeInfo.RebatePercentSports,
+			RebatePercentLottery: gradeInfo.RebatePercentLottery,
+			RebatePercentLive:    gradeInfo.RebatePercentLive,
+			RebatePercentEgame:   gradeInfo.RebatePercentEgame,
+			RebatePercentPoker:   gradeInfo.RebatePercentPoker,
+		}
+		grades = append(grades, grade)
+	}
+
+	// 保存用户等级
+	err := s.saveUserGrades(ctx, int(req.SiteId), grades, req.FieldsDisable, req.AutoProviding)
+	if err != nil {
+		tracing.SetSpanError(span, err)
+		return &v1.SaveUserGradesRes{
+			Code:    500,
+			Message: "保存失败: " + err.Error(),
+		}, nil
+	}
+
+	tracing.SetSpanAttributes(span, attribute.Bool("success", true))
+	return &v1.SaveUserGradesRes{
+		Code:    200,
+		Message: "保存成功",
+	}, nil
+}
+
+// DeleteUserGrades 删除用户等级
+func (s *sUser) DeleteUserGrades(ctx context.Context, req *v1.DeleteUserGradesReq) (*v1.DeleteUserGradesRes, error) {
+	// 参数验证
+	if req == nil {
+		return nil, fmt.Errorf("请求参数不能为空")
+	}
+
+	// 创建Jaeger span
+	ctx, span := tracing.StartSpan(ctx, "user.DeleteUserGrades", trace.WithAttributes(
+		attribute.String("method", "DeleteUserGrades"),
+		attribute.Int("site_id", int(req.SiteId)),
+		attribute.Int("grade_id", int(req.Id)),
+	))
+	defer span.End()
+
+	// 删除用户等级
+	err := s.deleteUserGrade(ctx, int(req.SiteId), int(req.Id))
+	if err != nil {
+		tracing.SetSpanError(span, err)
+		return &v1.DeleteUserGradesRes{
+			Code:    500,
+			Message: err.Error(),
+		}, nil
+	}
+
+	tracing.SetSpanAttributes(span, attribute.Bool("success", true))
+	return &v1.DeleteUserGradesRes{
+		Code:    200,
+		Message: "删除成功",
+	}, nil
+}
+
+// getUserGradeList 获取用户等级列表（内部方法）
+func (s *sUser) getUserGradeList(ctx context.Context, siteId int) ([]*entity.UserGrade, error) {
+	var grades []*entity.UserGrade
+
+	// 使用默认数据库连接
+	err := dao.UserGrade.DB().Model(dao.UserGrade.Table()).
+		Where(dao.UserGrade.Columns().SiteId, siteId).
+		Where(dao.UserGrade.Columns().Status, 1). // 只获取正常状态的等级
+		OrderAsc(dao.UserGrade.Columns().Id).
+		Scan(&grades)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return grades, nil
+}
+
+// saveUserGrades 保存用户等级（内部方法）
+func (s *sUser) saveUserGrades(ctx context.Context, siteId int, grades []*entity.UserGrade, fieldsDisable, autoProviding string) error {
+	// 使用默认数据库连接
+	db := dao.UserGrade.DB()
+
+	// 开启事务
+	return db.Transaction(ctx, func(ctx context.Context, tx gdb.TX) error {
+		for _, grade := range grades {
+			grade.SiteId = siteId
+			grade.FieldsDisable = fieldsDisable
+			grade.AutoProviding = autoProviding
+			grade.Status = 1 // 默认状态为正常
+
+			if grade.Id > 0 {
+				// 更新现有等级
+				grade.UpdatedAt = gtime.Now()
+				_, err := tx.Model(dao.UserGrade.Table()).
+					Where(dao.UserGrade.Columns().Id, grade.Id).
+					Where(dao.UserGrade.Columns().SiteId, siteId).
+					Data(grade).
+					Update()
+				if err != nil {
+					return err
+				}
+			} else {
+				// 创建新等级
+				grade.CreatedAt = gtime.Now()
+				grade.UpdatedAt = gtime.Now()
+				_, err := tx.Model(dao.UserGrade.Table()).Data(grade).Insert()
+				if err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	})
+}
+
+// deleteUserGrade 删除用户等级（内部方法）
+func (s *sUser) deleteUserGrade(ctx context.Context, siteId, gradeId int) error {
+	// 使用默认数据库连接
+	db := dao.UserGrade.DB()
+
+	// 记录删除操作的日志
+	g.Log().Infof(ctx, "开始删除用户等级: siteId=%d, gradeId=%d", siteId, gradeId)
+
+	// 首先检查要删除的等级是否存在
+	var existingGrade entity.UserGrade
+	err := db.Model(dao.UserGrade.Table()).
+		Where(dao.UserGrade.Columns().Id, gradeId).
+		Where(dao.UserGrade.Columns().SiteId, siteId).
+		Scan(&existingGrade)
+	if err != nil {
+		g.Log().Errorf(ctx, "查询等级失败: %v", err)
+		if err.Error() == "sql: no rows in result set" {
+			return fmt.Errorf("要删除的等级不存在")
+		}
+		return fmt.Errorf("查询等级信息失败: %v", err)
+	}
+
+	g.Log().Infof(ctx, "找到要删除的等级: %+v", existingGrade)
+
+	// 简化版本：直接删除等级，暂时跳过业务逻辑检查
+	result, err := db.Model(dao.UserGrade.Table()).
+		Where(dao.UserGrade.Columns().Id, gradeId).
+		Where(dao.UserGrade.Columns().SiteId, siteId).
+		Delete()
+
+	if err != nil {
+		g.Log().Errorf(ctx, "删除等级失败: %v", err)
+		return fmt.Errorf("删除等级失败: %v", err)
+	}
+
+	// 检查是否真的删除了记录
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		g.Log().Errorf(ctx, "获取删除结果失败: %v", err)
+		return fmt.Errorf("获取删除结果失败: %v", err)
+	}
+
+	g.Log().Infof(ctx, "删除操作影响行数: %d", rowsAffected)
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("没有删除任何记录，等级可能不存在")
+	}
+
+	g.Log().Infof(ctx, "成功删除用户等级: siteId=%d, gradeId=%d", siteId, gradeId)
+	return nil
+}
+
+// getUserCountByGrade 获取指定等级的用户数量（内部方法）
+func (s *sUser) getUserCountByGrade(ctx context.Context, siteId, gradeId int) (int, error) {
+	// 使用默认数据库连接
+	db := dao.UserGrade.DB()
+
+	count, err := db.Model("user").
+		Where("site_id", siteId).
+		Where("grade_id", gradeId).
+		Count()
+
+	return count, err
 }
