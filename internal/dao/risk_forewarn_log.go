@@ -5,7 +5,7 @@
 package dao
 
 import (
-	"jh_admin_service/internal/dao/internal"
+	"jh_app_service/internal/dao/internal"
 )
 
 // riskForewarnLogDao is the data access object for the table risk_forewarn_log.

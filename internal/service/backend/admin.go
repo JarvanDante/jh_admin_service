@@ -2,13 +2,13 @@ package backend
 
 import (
 	"context"
-	v1 "jh_admin_service/api/backend/admin/v1"
+	v1 "jh_app_service/api/backend/admin/v1"
 
 	"github.com/gogf/gf/v2/os/gtime"
 
-	"jh_admin_service/internal/dao"
-	"jh_admin_service/internal/model/do"
-	"jh_admin_service/internal/model/entity"
+	"jh_app_service/internal/dao"
+	"jh_app_service/internal/model/do"
+	"jh_app_service/internal/model/entity"
 )
 
 type (

@@ -3,8 +3,8 @@ package user
 import (
 	"context"
 	"fmt"
-	v1 "jh_admin_service/api/backend/user/v1"
-	"jh_admin_service/internal/service/backend"
+	v1 "jh_app_service/api/backend/user/v1"
+	"jh_app_service/internal/service/backend"
 
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
@@ -13,11 +13,11 @@ import (
 	"go.opentelemetry.io/otel/trace"
 	"golang.org/x/crypto/bcrypt"
 
-	"jh_admin_service/internal/dao"
-	"jh_admin_service/internal/middleware"
-	"jh_admin_service/internal/model/do"
-	"jh_admin_service/internal/model/entity"
-	"jh_admin_service/internal/tracing"
+	"jh_app_service/internal/dao"
+	"jh_app_service/internal/middleware"
+	"jh_app_service/internal/model/do"
+	"jh_app_service/internal/model/entity"
+	"jh_app_service/internal/tracing"
 )
 
 type (
@@ -498,7 +498,7 @@ func (s *sUser) GetUserGrades(ctx context.Context, req *v1.GetUserGradesReq) (*v
 	var gradeInfos []*v1.UserGradeInfo
 	for _, grade := range grades {
 		// 获取该等级的用户数量
-		userCount, _ := s.getUserCountByGrade(ctx, int(req.SiteId), grade.Id)
+		userCount, _ := s.getUserCountByGrade(ctx, int(req.SiteId), int(grade.Id))
 
 		gradeInfo := &v1.UserGradeInfo{
 			Id:                   int32(grade.Id),
@@ -546,7 +546,7 @@ func (s *sUser) SaveUserGrades(ctx context.Context, req *v1.SaveUserGradesReq) (
 	var grades []*entity.UserGrade
 	for _, gradeInfo := range req.Data {
 		grade := &entity.UserGrade{
-			Id:                   int(gradeInfo.Id),
+			Id:                   uint(gradeInfo.Id),
 			Name:                 gradeInfo.Name,
 			PointsUpgrade:        int(gradeInfo.PointsUpgrade),
 			BonusUpgrade:         gradeInfo.BonusUpgrade,

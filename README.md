@@ -1,6 +1,6 @@
-# JH User Service - 用户微服务
+# JH App Service - 前台用户/后台管理员微服务
 
-基于 GoFrame 框架的用户管理微服务，提供 gRPC 接口。
+基于 GoFrame 框架的前台用户/后台管理员微服务，提供 gRPC 接口。
 
 ## 功能特性
 
@@ -13,35 +13,40 @@
 ## 项目结构
 
 ```
-jh_admin_service/
-├── main.go                          # 入口文件
-├── manifest/
-│   ├── config/
-│   │   └── config.yaml             # 配置文件
-│   ├── protobuf/                   # Proto 文件
-│   │   ├── pbentity/
-│   │   │   └── user.proto         # 用户实体定义
-│   │   └── user/
-│   │       └── v1/
-│   │           └── user.proto     # 用户服务定义
-│   └── sql/
-│       └── create.sql             # 数据库建表脚本
-├── internal/
-│   ├── cmd/
-│   │   └── cmd.go                 # 命令行入口
-│   ├── controller/
-│   │   └── user/
-│   │       └── user.go           # 用户控制器
-│   ├── dao/                      # 数据访问层
-│   ├── logic/                    # 业务逻辑层
-│   ├── model/                    # 数据模型
-│   ├── registry/
-│   │   └── consul.go            # Consul 注册
-│   └── service/
-│       └── user.go              # 用户服务
-└── api/                         # 生成的 gRPC 代码
-    ├── pbentity/
-    └── user/
+jh_app_service
+│ ├── Makefile
+│ ├── README.md
+│ ├── api
+│ │ └── backend
+│ ├── go.mod
+│ ├── go.sum
+│ ├── hack
+│ │ └── config.yaml
+│ ├── internal
+│ │ ├── cmd
+│ │ ├── consts
+│ │ ├── controller
+│ │ ├── dao
+│ │ ├── logic
+│ │ ├── middleware
+│ │ ├── model
+│ │ ├── registry
+│ │ ├── service
+│ │ └── tracing
+│ ├── jh_app_service
+│ ├── jh_app_service_debug
+│ ├── main.go
+│ ├── manifest
+│ │ ├── config
+│ │ ├── deploy
+│ │ ├── docker
+│ │ ├── protobuf
+│ │ └── sql
+│ ├── scripts
+│ │ ├── fix_pb_omitempty.sh
+│ │ └── gen_pb_clean.sh
+│ └── test
+│     └── test_test.go
 ```
 
 ## 配置说明
@@ -52,7 +57,7 @@ jh_admin_service/
 # GRPC Server
 grpc:
   address: ":8002" # gRPC 服务端口
-  name: "jh_admin_service" # 服务名称
+  name: "jh_app_service" # 服务名称
   logPath: "" # 日志路径
   logStdout: true # 控制台输出
   errorStack: true # 错误堆栈
@@ -148,13 +153,13 @@ message DeleteReq {
 docker-compose up --build
 
 # 单独启动用户服务容器
-docker-compose up jh_admin_service
+docker-compose up jh_app_service
 
 # 进入容器
-docker-compose exec jh_admin_service bash
+docker-compose exec jh_app_service bash
 
 # 在容器内启动服务
-cd /var/www/html/jh/jh_admin_service
+cd /var/www/html/jh/jh_app_service
 go run main.go
 ```
 
@@ -214,13 +219,13 @@ CREATE TABLE `user` (
 1. 配置 Proto 文件路径：
 
    ```
-   /path/to/jh_admin_service/manifest/protobuf/user/v1/user.proto
+   /path/to/jh_app_service/manifest/protobuf/user/v1/user.proto
    ```
 
 2. 设置依赖目录：
 
    ```
-   /path/to/jh_admin_service/manifest/protobuf
+   /path/to/jh_app_service/manifest/protobuf
    ```
 
 3. 连接地址：
@@ -272,7 +277,7 @@ curl http://localhost:8500/v1/health/service/admin_service
 
 ```bash
 # Docker 方式
-docker-compose logs -f jh_admin_service
+docker-compose logs -f jh_app_service
 
 # 本地方式
 查看控制台输出和日志文件

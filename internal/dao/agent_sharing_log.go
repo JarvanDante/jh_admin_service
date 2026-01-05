@@ -5,7 +5,7 @@
 package dao
 
 import (
-	"jh_admin_service/internal/dao/internal"
+	"jh_app_service/internal/dao/internal"
 )
 
 // agentSharingLogDao is the data access object for the table agent_sharing_log.

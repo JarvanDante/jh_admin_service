@@ -6,7 +6,7 @@ package backend
 
 import (
 	"context"
-	"jh_admin_service/api/backend/role/v1"
+	"jh_app_service/api/backend/role/v1"
 )
 
 type (

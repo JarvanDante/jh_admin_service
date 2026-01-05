@@ -2,7 +2,7 @@ package backend
 
 import (
 	"context"
-	v1 "jh_admin_service/api/backend/upload/v1"
+	v1 "jh_app_service/api/backend/upload/v1"
 )
 
 type (

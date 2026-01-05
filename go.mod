@@ -1,4 +1,4 @@
-module jh_admin_service
+module jh_app_service
 
 go 1.25.3
 

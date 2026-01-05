@@ -3,11 +3,11 @@ package main
 import (
 	_ "github.com/gogf/gf/contrib/drivers/mysql/v2"
 
-	_ "jh_admin_service/internal/logic"
+	_ "jh_app_service/internal/logic"
 
 	"github.com/gogf/gf/v2/os/gctx"
 
-	"jh_admin_service/internal/cmd"
+	"jh_app_service/internal/cmd"
 )
 
 func main() {

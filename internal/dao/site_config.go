@@ -5,7 +5,7 @@
 package dao
 
 import (
-	"jh_admin_service/internal/dao/internal"
+	"jh_app_service/internal/dao/internal"
 )
 
 // internalSiteConfigDao is internal type for wrapping internal DAO implements.

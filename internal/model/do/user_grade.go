@@ -22,6 +22,7 @@ type UserGrade struct {
 	RebatePercentLottery any         // 额外返水比例: 彩票
 	RebatePercentLive    any         // 额外返水比例: 真人视讯
 	RebatePercentEgame   any         // 额外返水比例: 电子游戏
+	RebatePercentPoker   any         // 额外返水比例：棋牌
 	FieldsDisable        any         // 字段开关，用来关闭哪些字段
 	AutoProviding        any         // 哪些字段的业务是自动发放的
 	Status               any         // 状态.1=可用；0=禁用

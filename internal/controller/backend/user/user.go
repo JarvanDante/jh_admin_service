@@ -2,8 +2,8 @@ package user
 
 import (
 	"context"
-	v1 "jh_admin_service/api/backend/user/v1"
-	"jh_admin_service/internal/service/backend"
+	v1 "jh_app_service/api/backend/user/v1"
+	"jh_app_service/internal/service/backend"
 
 	"github.com/gogf/gf/contrib/rpc/grpcx/v2"
 )

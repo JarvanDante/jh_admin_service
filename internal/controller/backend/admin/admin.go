@@ -2,8 +2,8 @@ package admin
 
 import (
 	"context"
-	v2 "jh_admin_service/api/backend/admin/v1"
-	"jh_admin_service/internal/service/backend"
+	v2 "jh_app_service/api/backend/admin/v1"
+	"jh_app_service/internal/service/backend"
 
 	"github.com/gogf/gf/contrib/rpc/grpcx/v2"
 )

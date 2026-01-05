@@ -1,7 +1,7 @@
 package dao
 
 import (
-	"jh_admin_service/internal/model/entity"
+	"jh_app_service/internal/model/entity"
 
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"

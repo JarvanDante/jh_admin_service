@@ -31,6 +31,7 @@ type UserGradeColumns struct {
 	RebatePercentLottery string // 额外返水比例: 彩票
 	RebatePercentLive    string // 额外返水比例: 真人视讯
 	RebatePercentEgame   string // 额外返水比例: 电子游戏
+	RebatePercentPoker   string // 额外返水比例：棋牌
 	FieldsDisable        string // 字段开关，用来关闭哪些字段
 	AutoProviding        string // 哪些字段的业务是自动发放的
 	Status               string // 状态.1=可用；0=禁用
@@ -50,6 +51,7 @@ var userGradeColumns = UserGradeColumns{
 	RebatePercentLottery: "rebate_percent_lottery",
 	RebatePercentLive:    "rebate_percent_live",
 	RebatePercentEgame:   "rebate_percent_egame",
+	RebatePercentPoker:   "rebate_percent_poker",
 	FieldsDisable:        "fields_disable",
 	AutoProviding:        "auto_providing",
 	Status:               "status",

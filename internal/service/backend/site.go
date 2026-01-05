@@ -7,7 +7,7 @@ package backend
 
 import (
 	"context"
-	"jh_admin_service/api/backend/site/v1"
+	"jh_app_service/api/backend/site/v1"
 )
 
 type (

@@ -5,9 +5,9 @@
 package logic
 
 import (
-	_ "jh_admin_service/internal/logic/backend/admin"
-	_ "jh_admin_service/internal/logic/backend/role"
-	_ "jh_admin_service/internal/logic/backend/site"
-	_ "jh_admin_service/internal/logic/backend/upload"
-	_ "jh_admin_service/internal/logic/backend/user"
+	_ "jh_app_service/internal/logic/backend/admin"
+	_ "jh_app_service/internal/logic/backend/role"
+	_ "jh_app_service/internal/logic/backend/site"
+	_ "jh_app_service/internal/logic/backend/upload"
+	_ "jh_app_service/internal/logic/backend/user"
 )

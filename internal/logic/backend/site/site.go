@@ -3,14 +3,14 @@ package site
 import (
 	"context"
 	"fmt"
-	"jh_admin_service/api/backend/site/v1"
-	"jh_admin_service/internal/service/backend"
+	"jh_app_service/api/backend/site/v1"
+	"jh_app_service/internal/service/backend"
 
 	"github.com/gogf/gf/v2/frame/g"
-	"jh_admin_service/internal/dao"
-	"jh_admin_service/internal/middleware"
-	"jh_admin_service/internal/model/do"
-	"jh_admin_service/internal/model/entity"
+	"jh_app_service/internal/dao"
+	"jh_app_service/internal/middleware"
+	"jh_app_service/internal/model/do"
+	"jh_app_service/internal/model/entity"
 )
 
 type (

@@ -3,8 +3,8 @@ package admin
 import (
 	"context"
 	"fmt"
-	v1 "jh_admin_service/api/backend/admin/v1"
-	"jh_admin_service/internal/service/backend"
+	v1 "jh_app_service/api/backend/admin/v1"
+	"jh_app_service/internal/service/backend"
 	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -14,11 +14,11 @@ import (
 	"go.opentelemetry.io/otel/trace"
 
 	"golang.org/x/crypto/bcrypt"
-	"jh_admin_service/internal/dao"
-	"jh_admin_service/internal/middleware"
-	"jh_admin_service/internal/model/do"
-	"jh_admin_service/internal/model/entity"
-	"jh_admin_service/internal/tracing"
+	"jh_app_service/internal/dao"
+	"jh_app_service/internal/middleware"
+	"jh_app_service/internal/model/do"
+	"jh_app_service/internal/model/entity"
+	"jh_app_service/internal/tracing"
 )
 
 type (
