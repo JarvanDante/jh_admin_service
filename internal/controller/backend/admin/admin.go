@@ -31,6 +31,11 @@ func (*Controller) GetInfo(ctx context.Context, req *v2.GetInfoReq) (res *v2.Get
 	return backend.Admin().GetInfo(ctx, req)
 }
 
+// Menus 获取菜单列表
+func (*Controller) Menus(ctx context.Context, req *v2.MenusReq) (res *v2.MenusRes, err error) {
+	return backend.Admin().Menus(ctx, req)
+}
+
 // CreateAdmin 创建管理员
 func (*Controller) CreateAdmin(ctx context.Context, req *v2.CreateAdminReq) (res *v2.CreateAdminRes, err error) {
 	return backend.Admin().CreateAdmin(ctx, req)

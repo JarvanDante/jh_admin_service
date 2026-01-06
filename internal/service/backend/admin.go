@@ -16,6 +16,7 @@ type (
 		Login(ctx context.Context, req *v1.LoginReq) (*v1.LoginRes, error)
 		RefreshToken(ctx context.Context, req *v1.RefreshTokenReq) (*v1.RefreshTokenRes, error)
 		GetInfo(ctx context.Context, req *v1.GetInfoReq) (*v1.GetInfoRes, error)
+		Menus(ctx context.Context, req *v1.MenusReq) (*v1.MenusRes, error)
 		GetAdminList(ctx context.Context, req *v1.GetAdminListReq) (*v1.GetAdminListRes, error)
 		CreateAdmin(ctx context.Context, req *v1.CreateAdminReq) (*v1.CreateAdminRes, error)
 		UpdateAdmin(ctx context.Context, req *v1.UpdateAdminReq) (*v1.UpdateAdminRes, error)

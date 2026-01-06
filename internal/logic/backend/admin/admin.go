@@ -1292,3 +1292,134 @@ func (s *sAdmin) GetAdminLogs(ctx context.Context, req *v1.GetAdminLogsReq) (*v1
 		Count: int32(total),
 	}, nil
 }
+
+// Menus 获取菜单列表
+func (s *sAdmin) Menus(ctx context.Context, req *v1.MenusReq) (*v1.MenusRes, error) {
+	// 创建Jaeger span
+	ctx, span := tracing.StartSpan(ctx, "admin.Menus", trace.WithAttributes(
+		attribute.String("method", "Menus"),
+	))
+	defer span.End()
+
+	middleware.LogWithTrace(ctx, "info", "获取菜单列表请求")
+
+	// 从上下文中获取当前管理员ID
+	adminId, exists := middleware.GetAdminIdFromContext(ctx)
+	if !exists {
+		tracing.AddSpanEvent(span, "admin_id_not_found")
+		middleware.LogWithTrace(ctx, "error", "无法获取管理员ID")
+		return nil, fmt.Errorf("未登录或登录已过期")
+	}
+
+	tracing.SetSpanAttributes(span, attribute.Int("admin_id", int(adminId)))
+	middleware.LogWithTrace(ctx, "info", "获取到管理员ID: %d", adminId)
+
+	// 查询管理员信息
+	ctx, querySpan := tracing.StartSpan(ctx, "db.query.admin", trace.WithAttributes(
+		attribute.String("db.operation", "select"),
+		attribute.String("db.table", "admin"),
+	))
+
+	var admin *entity.Admin
+	err := dao.Admin.Ctx(ctx).Where(do.Admin{Id: adminId}).Scan(&admin)
+	querySpan.End()
+
+	if err != nil {
+		tracing.SetSpanError(span, err)
+		tracing.SetSpanError(querySpan, err)
+		middleware.LogWithTrace(ctx, "error", "查询管理员信息失败: %v", err)
+		return nil, fmt.Errorf("查询管理员信息失败: %v", err)
+	}
+
+	if admin == nil {
+		tracing.AddSpanEvent(span, "admin_not_found", attribute.Int("admin_id", int(adminId)))
+		middleware.LogWithTrace(ctx, "warning", "管理员不存在 - ID: %d", adminId)
+		return nil, fmt.Errorf("管理员不存在")
+	}
+
+	// 检查管理员状态
+	if admin.Status != 1 {
+		tracing.AddSpanEvent(span, "admin_status_invalid",
+			attribute.Int("admin_id", int(adminId)),
+			attribute.Int("status", admin.Status),
+		)
+		middleware.LogWithTrace(ctx, "warning", "管理员状态异常 - ID: %d, 状态: %d", adminId, admin.Status)
+		return nil, fmt.Errorf("账号已被禁用")
+	}
+
+	// 构建菜单列表 - 这里应该根据管理员的角色权限查询实际的菜单
+	// 暂时返回一个示例菜单结构，参考 go_service 项目的返回格式
+	menus := s.buildMenusForMenusAPI(ctx, admin)
+
+	res := &v1.MenusRes{
+		Menus: menus,
+	}
+
+	tracing.AddSpanEvent(span, "get_menus_success",
+		attribute.Int("admin_id", int(adminId)),
+		attribute.String("username", admin.Username),
+		attribute.Int("menu_count", len(menus)),
+	)
+	tracing.SetSpanAttributes(span, attribute.Bool("success", true))
+
+	middleware.LogWithTrace(ctx, "info", "获取菜单列表成功 - ID: %d, 用户名: %s, 菜单数量: %d",
+		adminId, admin.Username, len(menus))
+
+	return res, nil
+}
+
+// buildMenusForMenusAPI 为Menus API构建菜单结构 - 从数据库动态查询
+func (s *sAdmin) buildMenusForMenusAPI(ctx context.Context, admin *entity.Admin) []*v1.MenuInfo {
+	// 查询管理员角色权限
+	var rolePermissions []entity.AdminPermission
+	err := dao.AdminPermission.Ctx(ctx).
+		Where("status = ?", 1). // 只查询启用的权限
+		OrderAsc("sort").
+		OrderAsc("id").
+		Scan(&rolePermissions)
+
+	if err != nil {
+		middleware.LogWithTrace(ctx, "error", "查询菜单权限失败: %v", err)
+		return []*v1.MenuInfo{}
+	}
+
+	// 构建菜单树结构
+	menuMap := make(map[int]*v1.MenuInfo)
+	var rootMenus []*v1.MenuInfo
+
+	// 第一遍遍历：创建所有菜单项
+	for _, perm := range rolePermissions {
+		menuInfo := &v1.MenuInfo{
+			Id:          int32(perm.Id),
+			Type:        int32(perm.Type),
+			Name:        perm.Name,
+			BackendUrl:  perm.BackendUrl,
+			FrontendUrl: perm.FrontendUrl,
+			Open:        perm.Type == 1, // 菜单类型默认展开，操作权限默认不展开
+			Checked:     false,
+			Path:        perm.FrontendUrl, // 使用frontend_url作为path
+			Sort:        int32(perm.Sort),
+			Children:    []*v1.MenuInfo{},
+		}
+		menuMap[int(perm.Id)] = menuInfo
+	}
+
+	// 第二遍遍历：构建父子关系
+	for _, perm := range rolePermissions {
+		menuInfo := menuMap[int(perm.Id)]
+		if perm.ParentId == 0 {
+			// 根菜单
+			rootMenus = append(rootMenus, menuInfo)
+		} else {
+			// 子菜单
+			if parentMenu, exists := menuMap[perm.ParentId]; exists {
+				parentMenu.Children = append(parentMenu.Children, menuInfo)
+			}
+		}
+	}
+
+	middleware.LogWithTrace(ctx, "info", "从数据库构建菜单成功 - 总权限数: %d, 根菜单数: %d",
+		len(rolePermissions), len(rootMenus))
+
+	return rootMenus
+}
