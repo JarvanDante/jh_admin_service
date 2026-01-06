@@ -26,6 +26,11 @@ func (*Controller) RefreshToken(ctx context.Context, req *v2.RefreshTokenReq) (r
 	return backend.Admin().RefreshToken(ctx, req)
 }
 
+// GetInfo 获取管理员信息
+func (*Controller) GetInfo(ctx context.Context, req *v2.GetInfoReq) (res *v2.GetInfoRes, err error) {
+	return backend.Admin().GetInfo(ctx, req)
+}
+
 // CreateAdmin 创建管理员
 func (*Controller) CreateAdmin(ctx context.Context, req *v2.CreateAdminReq) (res *v2.CreateAdminRes, err error) {
 	return backend.Admin().CreateAdmin(ctx, req)

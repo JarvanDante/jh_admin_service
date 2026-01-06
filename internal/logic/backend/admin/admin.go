@@ -283,6 +283,169 @@ func (s *sAdmin) RefreshToken(ctx context.Context, req *v1.RefreshTokenReq) (*v1
 	return res, nil
 }
 
+// GetInfo 获取管理员信息
+func (s *sAdmin) GetInfo(ctx context.Context, req *v1.GetInfoReq) (*v1.GetInfoRes, error) {
+	// 创建Jaeger span
+	ctx, span := tracing.StartSpan(ctx, "admin.GetInfo", trace.WithAttributes(
+		attribute.String("method", "GetInfo"),
+	))
+	defer span.End()
+
+	middleware.LogWithTrace(ctx, "info", "获取管理员信息请求")
+
+	// 从上下文中获取当前管理员ID
+	adminId, exists := middleware.GetAdminIdFromContext(ctx)
+	if !exists {
+		tracing.AddSpanEvent(span, "admin_id_not_found")
+		middleware.LogWithTrace(ctx, "error", "无法获取管理员ID")
+		return nil, fmt.Errorf("未登录或登录已过期")
+	}
+
+	tracing.SetSpanAttributes(span, attribute.Int("admin_id", int(adminId)))
+	middleware.LogWithTrace(ctx, "info", "获取到管理员ID: %d", adminId)
+
+	// 查询管理员信息
+	ctx, querySpan := tracing.StartSpan(ctx, "db.query.admin", trace.WithAttributes(
+		attribute.String("db.operation", "select"),
+		attribute.String("db.table", "admin"),
+	))
+
+	var admin *entity.Admin
+	err := dao.Admin.Ctx(ctx).Where(do.Admin{Id: adminId}).Scan(&admin)
+	querySpan.End()
+
+	if err != nil {
+		tracing.SetSpanError(span, err)
+		tracing.SetSpanError(querySpan, err)
+		middleware.LogWithTrace(ctx, "error", "查询管理员信息失败: %v", err)
+		return nil, fmt.Errorf("查询管理员信息失败: %v", err)
+	}
+
+	if admin == nil {
+		tracing.AddSpanEvent(span, "admin_not_found", attribute.Int("admin_id", int(adminId)))
+		middleware.LogWithTrace(ctx, "warning", "管理员不存在 - ID: %d", adminId)
+		return nil, fmt.Errorf("管理员不存在")
+	}
+
+	// 检查管理员状态
+	if admin.Status != 1 {
+		tracing.AddSpanEvent(span, "admin_status_invalid",
+			attribute.Int("admin_id", int(adminId)),
+			attribute.Int("status", admin.Status),
+		)
+		middleware.LogWithTrace(ctx, "warning", "管理员状态异常 - ID: %d, 状态: %d", adminId, admin.Status)
+		return nil, fmt.Errorf("账号已被禁用")
+	}
+
+	// 查询管理员角色信息
+	ctx, roleSpan := tracing.StartSpan(ctx, "db.query.admin_role", trace.WithAttributes(
+		attribute.String("db.operation", "select"),
+		attribute.String("db.table", "admin_role"),
+	))
+
+	var role *entity.AdminRole
+	err = dao.AdminRole.Ctx(ctx).Where(do.AdminRole{Id: uint(admin.AdminRoleId)}).Scan(&role)
+	roleSpan.End()
+
+	if err != nil {
+		tracing.SetSpanError(roleSpan, err)
+		middleware.LogWithTrace(ctx, "error", "查询管理员角色信息失败: %v", err)
+		// 角色查询失败不影响基本信息返回，使用默认值
+	}
+
+	// 构建角色列表
+	roles := []string{}
+	if role != nil {
+		roles = append(roles, role.Name)
+	} else {
+		roles = append(roles, "未知角色")
+	}
+
+	// 查询菜单权限 - 这里需要根据实际的权限系统实现
+	// 暂时返回一个示例菜单结构
+	menus := s.buildMenus(ctx, admin)
+
+	// 构建响应
+	res := &v1.GetInfoRes{
+		Roles:        roles,
+		Name:         admin.Nickname,                                                    // 使用昵称作为显示名称
+		Avatar:       "https://wpimg.wallstcn.com/577965b9-bb9e-4e02-9f0c-095b41417191", // 默认头像
+		Introduction: fmt.Sprintf("管理员 %s", admin.Username),
+		Menus:        menus,
+	}
+
+	tracing.AddSpanEvent(span, "get_info_success",
+		attribute.Int("admin_id", int(adminId)),
+		attribute.String("username", admin.Username),
+		attribute.Int("menu_count", len(menus)),
+	)
+	tracing.SetSpanAttributes(span, attribute.Bool("success", true))
+
+	middleware.LogWithTrace(ctx, "info", "获取管理员信息成功 - ID: %d, 用户名: %s, 菜单数量: %d",
+		adminId, admin.Username, len(menus))
+
+	return res, nil
+}
+
+// buildMenus 构建菜单结构 - 这里是一个示例实现
+func (s *sAdmin) buildMenus(ctx context.Context, admin *entity.Admin) []*v1.MenuInfo {
+	// 这里应该根据管理员的角色权限查询实际的菜单
+	// 暂时返回一个示例菜单结构，参考 go_service 项目的返回格式
+
+	menus := []*v1.MenuInfo{
+		{
+			Id:   1,
+			Name: "系统管理",
+			Path: "system",
+			Type: 1,
+			Sort: 0,
+			Children: []*v1.MenuInfo{
+				{
+					Id:   2,
+					Name: "管理员管理",
+					Path: "system/admin",
+					Type: 1,
+					Sort: 0,
+					Children: []*v1.MenuInfo{
+						{
+							Id:   3,
+							Name: "管理员列表",
+							Path: "system/admin/list",
+							Type: 1,
+							Sort: 0,
+						},
+					},
+				},
+				{
+					Id:   4,
+					Name: "角色管理",
+					Path: "system/role",
+					Type: 1,
+					Sort: 1,
+				},
+			},
+		},
+		{
+			Id:   5,
+			Name: "用户管理",
+			Path: "user",
+			Type: 1,
+			Sort: 1,
+			Children: []*v1.MenuInfo{
+				{
+					Id:   6,
+					Name: "用户列表",
+					Path: "user/list",
+					Type: 1,
+					Sort: 0,
+				},
+			},
+		},
+	}
+
+	return menus
+}
+
 // CreateAdmin 创建管理员
 func (s *sAdmin) CreateAdmin(ctx context.Context, req *v1.CreateAdminReq) (*v1.CreateAdminRes, error) {
 	// 创建Jaeger span
