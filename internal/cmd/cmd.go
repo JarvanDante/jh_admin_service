@@ -3,7 +3,10 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"jh_app_service/internal/controller/backend/ad"
 	"jh_app_service/internal/controller/backend/admin"
+	"jh_app_service/internal/controller/backend/message"
+	"jh_app_service/internal/controller/backend/notice"
 	"jh_app_service/internal/controller/backend/role"
 	"jh_app_service/internal/controller/backend/site"
 	"jh_app_service/internal/controller/backend/upload"
@@ -73,6 +76,9 @@ var (
 			role.Register(s)
 			upload.Register(s)
 			user.Register(s)
+			message.Register(s)
+			ad.Register(s)
+			notice.Register(s)
 
 			fmt.Println("gRPC服务器启动中...")
 
