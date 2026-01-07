@@ -5,6 +5,7 @@ import (
 	"fmt"
 	v1 "jh_app_service/api/backend/admin/v1"
 	"jh_app_service/internal/service/backend"
+	"jh_app_service/internal/util"
 	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -1247,6 +1248,57 @@ func (s *sAdmin) GetAdminLogs(ctx context.Context, req *v1.GetAdminLogsReq) (*v1
 		attribute.Int("offset", int((page-1)*size)),
 	))
 
+	// 方案1: 尝试使用数据库函数直接格式化时间
+	var rawResults []map[string]interface{}
+	err = query.Fields(
+		"admin_username",
+		"ip",
+		"remark",
+		"DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') as created_at_formatted",
+		"UNIX_TIMESTAMP(created_at) as created_at_unix",
+	).Page(int(page), int(size)).
+		OrderDesc("created_at").
+		Scan(&rawResults)
+
+	if err == nil && len(rawResults) > 0 {
+		// 使用数据库格式化的结果
+		listSpan.End()
+
+		var logList []*v1.AdminLogInfo
+		for _, result := range rawResults {
+			createdAtFormatted := result["created_at_formatted"]
+			createdAtStr := ""
+
+			if createdAtFormatted != nil {
+				createdAtStr = fmt.Sprintf("%v", createdAtFormatted)
+				// 检查是否为无效时间
+				if createdAtStr == "0000-00-00 00:00:00" || createdAtStr == "" {
+					createdAtStr = ""
+				}
+			}
+
+			logList = append(logList, &v1.AdminLogInfo{
+				Username:  fmt.Sprintf("%v", result["admin_username"]),
+				Ip:        fmt.Sprintf("%v", result["ip"]),
+				Remark:    fmt.Sprintf("%v", result["remark"]),
+				CreatedAt: createdAtStr,
+			})
+		}
+
+		// 确保返回空数组而不是nil
+		if logList == nil {
+			logList = []*v1.AdminLogInfo{}
+		}
+
+		middleware.LogWithTrace(ctx, "info", fmt.Sprintf("使用数据库格式化获取管理员日志列表成功，总数: %d，返回: %d", total, len(logList)))
+
+		return &v1.GetAdminLogsRes{
+			List:  logList,
+			Count: int32(total),
+		}, nil
+	}
+
+	// 查询管理员日志数据
 	var logs []entity.AdminLog
 	err = query.Fields("admin_username", "ip", "remark", "created_at").
 		Page(int(page), int(size)).
@@ -1262,10 +1314,8 @@ func (s *sAdmin) GetAdminLogs(ctx context.Context, req *v1.GetAdminLogsReq) (*v1
 	// 转换为响应格式
 	var logList []*v1.AdminLogInfo
 	for _, log := range logs {
-		createdAt := ""
-		if log.CreatedAt != nil {
-			createdAt = log.CreatedAt.Format("2006-01-02 15:04:05")
-		}
+		// 使用修复后的工具函数处理时间格式化
+		createdAt := util.FormatTime(log.CreatedAt)
 
 		logList = append(logList, &v1.AdminLogInfo{
 			Username:  log.AdminUsername,
