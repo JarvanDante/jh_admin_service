@@ -29,6 +29,7 @@ type AdminPermissionColumns struct {
 	FrontendUrl string // 前端url
 	Status      string // 状态。1=可用；0=禁用
 	Sort        string // 排序。值越小，越靠前
+	Icon        string // 菜单图标
 	CreatedAt   string //
 	UpdatedAt   string //
 }
@@ -43,6 +44,7 @@ var adminPermissionColumns = AdminPermissionColumns{
 	FrontendUrl: "frontend_url",
 	Status:      "status",
 	Sort:        "sort",
+	Icon:        "icon",
 	CreatedAt:   "created_at",
 	UpdatedAt:   "updated_at",
 }

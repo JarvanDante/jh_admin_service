@@ -20,6 +20,7 @@ type AdminPermission struct {
 	FrontendUrl any         // 前端url
 	Status      any         // 状态。1=可用；0=禁用
 	Sort        any         // 排序。值越小，越靠前
+	Icon        any         // 菜单图标
 	CreatedAt   *gtime.Time //
 	UpdatedAt   *gtime.Time //
 }

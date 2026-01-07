@@ -1400,6 +1400,7 @@ func (s *sAdmin) buildMenusForMenusAPI(ctx context.Context, admin *entity.Admin)
 			Path:        perm.FrontendUrl, // 使用frontend_url作为path
 			Sort:        int32(perm.Sort),
 			Children:    []*v1.MenuInfo{},
+			Icon:        perm.Icon,
 		}
 		menuMap[int(perm.Id)] = menuInfo
 	}
