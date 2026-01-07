@@ -6,6 +6,7 @@ import (
 	v1 "jh_app_service/api/backend/admin/v1"
 	"jh_app_service/internal/service/backend"
 	"jh_app_service/internal/util"
+	"strings"
 	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -1420,9 +1421,32 @@ func (s *sAdmin) Menus(ctx context.Context, req *v1.MenusReq) (*v1.MenusRes, err
 
 // buildMenusForMenusAPI 为Menus API构建菜单结构 - 从数据库动态查询
 func (s *sAdmin) buildMenusForMenusAPI(ctx context.Context, admin *entity.Admin) []*v1.MenuInfo {
+	//admin.AdminRoleId
+	var adminRole entity.AdminRole
+	errRole := dao.AdminRole.Ctx(ctx).Where("id = ?", admin.AdminRoleId).Scan(&adminRole)
+	if errRole != nil {
+		middleware.LogWithTrace(ctx, "error", "查询角色失败: %v", errRole)
+		return []*v1.MenuInfo{}
+	}
+
+	if len(adminRole.Permissions) == 0 {
+		middleware.LogWithTrace(ctx, "error", "查询角色ID %d 的权限节点为空", admin.AdminRoleId)
+		return []*v1.MenuInfo{}
+	}
+
+	// 将权限字符串分割成ID切片
+	permissionIds := strings.Split(adminRole.Permissions, ",")
+	if len(permissionIds) == 0 {
+		middleware.LogWithTrace(ctx, "error", "角色ID %d 的权限解析为空", admin.AdminRoleId)
+		return []*v1.MenuInfo{}
+	}
+
+	middleware.LogWithTrace(ctx, "info", "角色ID %d 的权限列表: %v", admin.AdminRoleId, permissionIds)
+
 	// 查询管理员角色权限
 	var rolePermissions []entity.AdminPermission
 	err := dao.AdminPermission.Ctx(ctx).
+		WhereIn("id", permissionIds).
 		Where("status = ?", 1). // 只查询启用的权限
 		OrderAsc("sort").
 		OrderAsc("id").
