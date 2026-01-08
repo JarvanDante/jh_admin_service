@@ -9,6 +9,7 @@ import (
 	_ "jh_app_service/internal/logic/backend/admin"
 	_ "jh_app_service/internal/logic/backend/message"
 	_ "jh_app_service/internal/logic/backend/notice"
+	_ "jh_app_service/internal/logic/backend/option"
 	_ "jh_app_service/internal/logic/backend/role"
 	_ "jh_app_service/internal/logic/backend/site"
 	_ "jh_app_service/internal/logic/backend/upload"

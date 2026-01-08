@@ -7,6 +7,7 @@ import (
 	"jh_app_service/internal/controller/backend/admin"
 	"jh_app_service/internal/controller/backend/message"
 	"jh_app_service/internal/controller/backend/notice"
+	"jh_app_service/internal/controller/backend/option"
 	"jh_app_service/internal/controller/backend/role"
 	"jh_app_service/internal/controller/backend/site"
 	"jh_app_service/internal/controller/backend/upload"
@@ -79,6 +80,7 @@ var (
 			message.Register(s)
 			ad.Register(s)
 			notice.Register(s)
+			option.Register(s)
 
 			fmt.Println("gRPC服务器启动中...")
 
