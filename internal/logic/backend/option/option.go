@@ -51,7 +51,7 @@ func (s *sOption) GetUserGradeList(ctx context.Context, req *v1.UserGradeListReq
 	middleware.LogWithTrace(ctx, "info", "获取会员等级列表成功 - 总数: %d", len(grades))
 
 	return &v1.UserGradeListResponse{
-		Data: grades,
+		Grades: grades,
 	}, nil
 }
 
@@ -88,6 +88,6 @@ func (s *sOption) GetAdminRoleList(ctx context.Context, req *v1.AdminRoleListReq
 	middleware.LogWithTrace(ctx, "info", "获取后台角色列表成功 - 总数: %d", len(roles))
 
 	return &v1.AdminRoleListResponse{
-		Data: roles,
+		Roles: roles,
 	}, nil
 }
