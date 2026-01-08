@@ -374,6 +374,7 @@ func (s *sUser) GetUserBasicInfo(ctx context.Context, req *v1.GetUserBasicInfoRe
 	basicInfo := &v1.UserBasicInfo{
 		Id:            int32(user.Id),
 		Username:      user.Username,
+		GradeId:       int32(user.GradeId), // 添加等级ID
 		Realname:      user.Realname,
 		Mobile:        user.Mobile,
 		Email:         user.Email,
