@@ -9,6 +9,7 @@ import (
 	"jh_app_service/internal/model/do"
 	"jh_app_service/internal/model/entity"
 	"jh_app_service/internal/service/backend"
+	"jh_app_service/internal/util"
 
 	"github.com/gogf/gf/v2/os/gtime"
 )
@@ -58,7 +59,7 @@ func (s *sAd) GetAdList(ctx context.Context, req *v1.GetAdListReq) (*v1.GetAdLis
 	// 分页查询
 	var ads []*entity.Ad
 	offset := int((page - 1) * size)
-	err = query.Fields("id, name, image, url, position, status, sort, created_at, updated_at").
+	err = query.Fields("id, name, image, url, position, status, sort, created_at, updated_at, start_time, expired_time").
 		Order("sort ASC, created_at DESC").
 		Limit(offset, int(size)).
 		Scan(&ads)
@@ -85,6 +86,12 @@ func (s *sAd) GetAdList(ctx context.Context, req *v1.GetAdListReq) (*v1.GetAdLis
 	// 转换为响应格式
 	adList := make([]*v1.AdItem, 0, len(ads))
 	for _, ad := range ads {
+		// 使用修复后的工具函数处理时间格式化
+		startTime := util.FormatTime(ad.StartTime)
+		expiredTime := util.FormatTime(ad.ExpiredTime)
+		createdAt := util.FormatTime(ad.CreatedAt)
+		updatedAt := util.FormatTime(ad.UpdatedAt)
+
 		adList = append(adList, &v1.AdItem{
 			Id:           int32(ad.Id),
 			Title:        ad.Name,
@@ -95,8 +102,10 @@ func (s *sAd) GetAdList(ctx context.Context, req *v1.GetAdListReq) (*v1.GetAdLis
 			Status:       int32(ad.Status),
 			StatusName:   statusMap[ad.Status],
 			Sort:         int32(ad.Sort),
-			CreatedAt:    ad.CreatedAt.Format("2006-01-02 15:04:05"),
-			UpdatedAt:    ad.UpdatedAt.Format("2006-01-02 15:04:05"),
+			CreatedAt:    createdAt,
+			UpdatedAt:    updatedAt,
+			StartTime:    startTime,
+			ExpiredTime:  expiredTime,
 		})
 	}
 
@@ -134,20 +143,35 @@ func (s *sAd) CreateAd(ctx context.Context, req *v1.CreateAdReq) (*v1.CreateAdRe
 	// 默认站点ID为1
 	siteId := int32(1)
 
-	// 创建广告记录
-	ad := &do.Ad{
-		SiteId:    siteId,
-		Name:      req.Title,
-		Image:     req.Image,
-		Url:       req.Link,
-		Position:  int(req.Position),
-		Status:    int(req.Status),
-		Sort:      int(req.Sort),
-		CreatedAt: gtime.Now(),
-		UpdatedAt: gtime.Now(),
+	// 解析开始时间和过期时间
+	startTime, err := gtime.StrToTime(req.StartTime)
+	if err != nil {
+		middleware.LogWithTrace(ctx, "error", "开始时间格式错误: %v", err)
+		return nil, fmt.Errorf("开始时间格式错误")
 	}
 
-	_, err := dao.Ad.Ctx(ctx).Data(ad).Insert()
+	expiredTime, err := gtime.StrToTime(req.ExpiredTime)
+	if err != nil {
+		middleware.LogWithTrace(ctx, "error", "过期时间格式错误: %v", err)
+		return nil, fmt.Errorf("过期时间格式错误")
+	}
+
+	// 创建广告记录
+	ad := &do.Ad{
+		SiteId:      siteId,
+		Name:        req.Title,
+		Image:       req.Image,
+		Url:         req.Link,
+		Position:    int(req.Position),
+		Status:      int(req.Status),
+		Sort:        int(req.Sort),
+		StartTime:   startTime,
+		ExpiredTime: expiredTime,
+		CreatedAt:   gtime.Now(),
+		UpdatedAt:   gtime.Now(),
+	}
+
+	_, err = dao.Ad.Ctx(ctx).Data(ad).Insert()
 	if err != nil {
 		middleware.LogWithTrace(ctx, "error", "创建广告失败: %v", err)
 		return nil, err
@@ -176,15 +200,30 @@ func (s *sAd) UpdateAd(ctx context.Context, req *v1.UpdateAdReq) (*v1.UpdateAdRe
 		return nil, fmt.Errorf("广告不存在")
 	}
 
+	// 解析开始时间和过期时间
+	startTime, err := gtime.StrToTime(req.StartTime)
+	if err != nil {
+		middleware.LogWithTrace(ctx, "error", "开始时间格式错误: %v", err)
+		return nil, fmt.Errorf("开始时间格式错误")
+	}
+
+	expiredTime, err := gtime.StrToTime(req.ExpiredTime)
+	if err != nil {
+		middleware.LogWithTrace(ctx, "error", "过期时间格式错误: %v", err)
+		return nil, fmt.Errorf("过期时间格式错误")
+	}
+
 	// 更新广告
 	updateData := &do.Ad{
-		Name:      req.Title,
-		Image:     req.Image,
-		Url:       req.Link,
-		Position:  int(req.Position),
-		Status:    int(req.Status),
-		Sort:      int(req.Sort),
-		UpdatedAt: gtime.Now(),
+		Name:        req.Title,
+		Image:       req.Image,
+		Url:         req.Link,
+		Position:    int(req.Position),
+		Status:      int(req.Status),
+		Sort:        int(req.Sort),
+		StartTime:   startTime,
+		ExpiredTime: expiredTime,
+		UpdatedAt:   gtime.Now(),
 	}
 
 	_, err = dao.Ad.Ctx(ctx).Where("id", req.Id).Where("site_id", siteId).Data(updateData).Update()

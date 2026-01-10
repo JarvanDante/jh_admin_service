@@ -9,6 +9,7 @@ import (
 	"jh_app_service/internal/model/do"
 	"jh_app_service/internal/model/entity"
 	"jh_app_service/internal/service/backend"
+	"jh_app_service/internal/util"
 
 	"github.com/gogf/gf/v2/os/gtime"
 )
@@ -58,7 +59,7 @@ func (s *sNotice) GetNoticeList(ctx context.Context, req *v1.GetNoticeListReq) (
 	// 分页查询
 	var notices []*entity.Notice
 	offset := int((page - 1) * size)
-	err = query.Fields("id, title, content, type, status, sort, created_at, updated_at").
+	err = query.Fields("id, title, content, type, status, sort, url, start_time, expired_time, created_at, updated_at").
 		Order("sort ASC, created_at DESC").
 		Limit(offset, int(size)).
 		Scan(&notices)
@@ -86,18 +87,27 @@ func (s *sNotice) GetNoticeList(ctx context.Context, req *v1.GetNoticeListReq) (
 		// 默认置顶为0，如果实体有该字段则使用
 		isTop := int32(0)
 
+		// 使用修复后的工具函数处理时间格式化
+		startTime := util.FormatTime(notice.StartTime)
+		expiredTime := util.FormatTime(notice.ExpiredTime)
+		createdAt := util.FormatTime(notice.CreatedAt)
+		updatedAt := util.FormatTime(notice.UpdatedAt)
+
 		noticeList = append(noticeList, &v1.NoticeItem{
-			Id:         int32(notice.Id),
-			Title:      notice.Title,
-			Content:    notice.Content,
-			Type:       int32(notice.Type),
-			TypeName:   typeMap[notice.Type],
-			Status:     int32(notice.Status),
-			StatusName: statusMap[notice.Status],
-			Sort:       int32(notice.Sort),
-			IsTop:      isTop,
-			CreatedAt:  notice.CreatedAt.Format("2006-01-02 15:04:05"),
-			UpdatedAt:  notice.UpdatedAt.Format("2006-01-02 15:04:05"),
+			Id:          int32(notice.Id),
+			Title:       notice.Title,
+			Content:     notice.Content,
+			Type:        int32(notice.Type),
+			TypeName:    typeMap[notice.Type],
+			Status:      int32(notice.Status),
+			StatusName:  statusMap[notice.Status],
+			Sort:        int32(notice.Sort),
+			IsTop:       isTop,
+			CreatedAt:   createdAt,
+			UpdatedAt:   updatedAt,
+			Url:         notice.Url,
+			StartTime:   startTime,
+			ExpiredTime: expiredTime,
 		})
 	}
 
@@ -133,19 +143,35 @@ func (s *sNotice) CreateNotice(ctx context.Context, req *v1.CreateNoticeReq) (*v
 	// 默认站点ID为1
 	siteId := int32(1)
 
-	// 创建公告记录
-	notice := &do.Notice{
-		SiteId:    siteId,
-		Title:     req.Title,
-		Content:   req.Content,
-		Type:      int(req.Type),
-		Status:    int(req.Status),
-		Sort:      int(req.Sort),
-		CreatedAt: gtime.Now(),
-		UpdatedAt: gtime.Now(),
+	// 解析开始时间和过期时间
+	startTime, err := gtime.StrToTime(req.StartTime)
+	if err != nil {
+		middleware.LogWithTrace(ctx, "error", "开始时间格式错误: %v", err)
+		return nil, fmt.Errorf("开始时间格式错误")
 	}
 
-	_, err := dao.Notice.Ctx(ctx).Data(notice).Insert()
+	expiredTime, err := gtime.StrToTime(req.ExpiredTime)
+	if err != nil {
+		middleware.LogWithTrace(ctx, "error", "过期时间格式错误: %v", err)
+		return nil, fmt.Errorf("过期时间格式错误")
+	}
+
+	// 创建公告记录
+	notice := &do.Notice{
+		SiteId:      siteId,
+		Title:       req.Title,
+		Content:     req.Content,
+		Type:        int(req.Type),
+		Status:      int(req.Status),
+		Sort:        int(req.Sort),
+		Url:         req.Url,
+		StartTime:   startTime,
+		ExpiredTime: expiredTime,
+		CreatedAt:   gtime.Now(),
+		UpdatedAt:   gtime.Now(),
+	}
+
+	_, err = dao.Notice.Ctx(ctx).Data(notice).Insert()
 	if err != nil {
 		middleware.LogWithTrace(ctx, "error", "创建公告失败: %v", err)
 		return nil, err
@@ -174,14 +200,30 @@ func (s *sNotice) UpdateNotice(ctx context.Context, req *v1.UpdateNoticeReq) (*v
 		return nil, fmt.Errorf("公告不存在")
 	}
 
+	// 解析开始时间和过期时间
+	startTime, err := gtime.StrToTime(req.StartTime)
+	if err != nil {
+		middleware.LogWithTrace(ctx, "error", "开始时间格式错误: %v", err)
+		return nil, fmt.Errorf("开始时间格式错误")
+	}
+
+	expiredTime, err := gtime.StrToTime(req.ExpiredTime)
+	if err != nil {
+		middleware.LogWithTrace(ctx, "error", "过期时间格式错误: %v", err)
+		return nil, fmt.Errorf("过期时间格式错误")
+	}
+
 	// 更新公告
 	updateData := &do.Notice{
-		Title:     req.Title,
-		Content:   req.Content,
-		Type:      int(req.Type),
-		Status:    int(req.Status),
-		Sort:      int(req.Sort),
-		UpdatedAt: gtime.Now(),
+		Title:       req.Title,
+		Content:     req.Content,
+		Type:        int(req.Type),
+		Status:      int(req.Status),
+		Sort:        int(req.Sort),
+		Url:         req.Url,
+		StartTime:   startTime,
+		ExpiredTime: expiredTime,
+		UpdatedAt:   gtime.Now(),
 	}
 
 	_, err = dao.Notice.Ctx(ctx).Where("id", req.Id).Where("site_id", siteId).Data(updateData).Update()
